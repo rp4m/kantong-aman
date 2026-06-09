@@ -193,13 +193,13 @@ function PeriodFormDialog({
     }
   }, [open, initial]);
 
-  const submit = () => {
+  const submit = async () => {
     try {
       if (initial) {
-        updateBudgetPeriod(initial.id, { name: name.trim(), description, startDate, endDate, status });
+        await updateBudgetPeriod(initial.id, { name: name.trim(), description, startDate, endDate, status });
         toast.success("Budget diperbarui");
       } else {
-        addBudgetPeriod({ name, description, startDate, endDate, status });
+        await addBudgetPeriod({ name, description, startDate, endDate, status });
         toast.success("Budget dibuat");
       }
       onOpenChange(false);
