@@ -37,44 +37,42 @@ function rangeFor(
 
   switch (key) {
     case "today": {
-      const now = new Date(); now.setHours(0, 0, 0, 0);
       return {
-        start: now,
-        end: now,
-        label: formatDate(now),
+        start: todayISO(),
+        end: todayISO(),
+        label: formatDate(todayISO()),
       };
     }
 
     case "month": {
       return {
-        start: from,
-        end: to,
-        label: formatDateRange(from, to),
+        start: toISODate(startOfMonth(now)),
+        end: toISODate(endOfMonth(now)),
+        label: formatDateRange(toISODate(startOfMonth(now)), toISODate(endOfMonth(now))),
       };
     }
 
     case "year": {
       return {
-        start: from,
-        end: to,
-        label: String(from.getFullYear()),
+        start: toISODate(startOfYear(now)),
+        end: toISODate(endOfYear(now)),
+        label: String(now.getFullYear()),
       };
     }
 
     case "custom": {
       if (!custom) {
-        const now = new Date(); now.setHours(0, 0, 0, 0);
         return {
-          start: now,
-          end: now,
-          label: formatDate(now),
+          start: todayISO(),
+          end: todayISO(),
+          label: formatDate(todayISO()),
         };
       }
       
       return {
-        start: from,
-        end: to,
-        label: formatDateRange(from, to),
+        start: toISODate(custom.from),
+        end: toISODate(custom.to),
+        label: formatDateRange(toISODate(custom.from), toISODate(custom.to)),
       };
     }
   }
