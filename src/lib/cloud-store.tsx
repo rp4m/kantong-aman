@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { createBudgetPeriod, inviteBudgetCollaborator } from "./budget.functions";
 import type {
   Transaction,
   Category,
@@ -439,16 +440,17 @@ export async function deletePIC(id: string) {
 
 // --- Budget Periods ---
 export async function addBudgetPeriod(input: { name: string; description?: string; startDate: string; endDate: string; status?: BudgetPeriodStatus }) {
-  const uid = ensureUser();
   const name = input.name.trim();
   if (!name) throw new Error("Nama budget wajib diisi");
   if (!input.startDate || !input.endDate) throw new Error("Tanggal mulai & selesai wajib diisi");
   if (input.startDate > input.endDate) throw new Error("Tanggal mulai harus sebelum tanggal selesai");
-  const { data, error } = await supabase.from("budget_periods").insert({
-    owner_user_id: uid, name, description: input.description ?? "",
-    start_date: input.startDate, end_date: input.endDate, status: input.status ?? "active",
-  }).select("*").single();
-  if (error) throw error;
+  const data = await createBudgetPeriod({ data: {
+    name,
+    description: input.description ?? "",
+    startDate: input.startDate,
+    endDate: input.endDate,
+    status: input.status ?? "active",
+  } });
   periodCache = [toPeriod(data), ...periodCache];
   emit();
   return toPeriod(data);
@@ -534,17 +536,7 @@ export async function cloneBudgetPeriod(
 export async function inviteCollaborator(budgetPeriodId: string, email: string, role: "collaborator" | "viewer") {
   const e = email.trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) throw new Error("Email tidak valid");
-  // Try lookup existing user
-  const { data: prof } = await supabase.from("profiles").select("id").eq("email", e).maybeSingle();
-  const { data, error } = await supabase.from("budget_collaborators").insert({
-    budget_period_id: budgetPeriodId,
-    invited_email: e,
-    user_id: prof?.id ?? null,
-    role,
-    status: prof?.id ? "accepted" : "pending",
-    accepted_at: prof?.id ? new Date().toISOString() : null,
-  }).select("*").single();
-  if (error) throw error;
+  const data = await inviteBudgetCollaborator({ data: { budgetPeriodId, email: e, role } });
   collaboratorCache = [toCollab(data), ...collaboratorCache];
   emit();
 }
