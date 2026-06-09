@@ -61,7 +61,7 @@ function AuthPage() {
         const { error } = await supabase.auth.signUp({
           email, password,
           options: {
-            emailRedirectTo: `${window.location.origin}/`,
+            emailRedirectTo: `${redirectUri}/`,
             data: { full_name: fullName },
           },
         });
@@ -70,7 +70,7 @@ function AuthPage() {
         setMode("login");
       } else {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/reset-password`,
+          redirectTo: `${redirectUri}/reset-password`,
         });
         if (error) throw error;
         toast.success("Email reset password telah dikirim.");
