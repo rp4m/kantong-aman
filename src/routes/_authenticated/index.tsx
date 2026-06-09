@@ -267,14 +267,13 @@ function HomePage() {
             <TabsTrigger value="today">Hari Ini</TabsTrigger>
             <TabsTrigger value="month">Bulan Ini</TabsTrigger>
             <TabsTrigger value="year">Tahun Ini</TabsTrigger>
-            <TabsTrigger value="custom">
+            <TabsTrigger value="custom" className="gap-1">
               Custom
               {filterKey === "custom" && (
-              <Popover open={calOpen} onOpenChange={setCalOpen}>
-                <PopoverTrigger asChild>
+                <Popover open={calOpen} onOpenChange={setCalOpen}>
+                  <PopoverTrigger asChild>
                     <ChevronDown className="h-3 w-3" />
-                </PopoverTrigger>
-            
+                  </PopoverTrigger>
                 <PopoverContent className="w-80">
                   <div className="space-y-4">
                     <div>
