@@ -92,7 +92,7 @@ function HomePage() {
 
     return transactions.filter((t) => {
       // Must be within the date range
-      if (t.date < start || t.date > end) return false;
+      // if (t.date < start || t.date > end) return false;
       // Must belong to one of the filtered budgets
       // Check via budgetItemId
       if (t.budgetItemId && filteredItemIds.has(t.budgetItemId)) return true;
