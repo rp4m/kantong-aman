@@ -256,9 +256,10 @@ function HomePage() {
           </TabsList>
         </Tabs>
         {filterKey === "custom" && (
-          <div className="mt-2 grid grid-cols-2 gap-2">
+          <div className="mt-2 flex justify-center gap-2">
             <Input
               type="date"
+              className="w-40"
               value={range.start}
               onChange={(e) =>
                 setCustomRange((prev) => ({
@@ -267,9 +268,10 @@ function HomePage() {
                 }))
               }
             />
-            
+        
             <Input
               type="date"
+              className="w-40"
               value={range.end}
               onChange={(e) =>
                 setCustomRange((prev) => ({
