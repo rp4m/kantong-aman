@@ -91,10 +91,6 @@ function HomePage() {
     from: startOfMonth(new Date()),
     to: endOfMonth(new Date()),
   });
-  const [tempRange, setTempRange] = useState({
-    from: customRange.from,
-    to: customRange.to,
-  });
   const [calOpen, setCalOpen] = useState(false);
 
   const range = useMemo(() => rangeFor(filterKey, customRange), [filterKey, customRange]);
@@ -270,8 +266,27 @@ function HomePage() {
 
       {filter === "custom" && (
         <div className="mt-2 grid grid-cols-2 gap-2">
-          <Input type="date" value={range.start} onChange={(e) => setCustomRange({ from: new Date(e.target.value), to: new Date(range.end) })} />
-          <Input type="date" value={range.end} onChange={(e) => setCustomRange({ from: new Date(range.start), to: new Date(e.target.value) })} />
+          <Input
+            type="date"
+            value={range.start}
+            onChange={(e) =>
+              setCustomRange((prev) => ({
+                ...prev,
+                from: new Date(e.target.value),
+              }))
+            }
+          />
+          
+          <Input
+            type="date"
+            value={range.end}
+            onChange={(e) =>
+              setCustomRange((prev) => ({
+                ...prev,
+                to: new Date(e.target.value),
+              }))
+            }
+          />
         </div>
       )}
 
