@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/pengaturan")({
+export const Route = createFileRoute("/_authenticated/pengaturan")({
   head: () => ({
     meta: [
       { title: "Pengaturan – Kantong Aman" },

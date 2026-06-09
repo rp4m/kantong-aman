@@ -18,13 +18,13 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   useTransactions, deleteTransaction, useCategories, usePICs, useBudgetItems,
-} from "@/lib/budget-store";
+} from "@/lib/cloud-store";
 import { formatRupiah, formatDate } from "@/lib/budget-format";
 import { INCOME_CATEGORIES, type Transaction } from "@/lib/budget-types";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/transaksi")({
+export const Route = createFileRoute("/_authenticated/transaksi")({
   head: () => ({
     meta: [
       { title: "Transaksi – Kantong Aman" },

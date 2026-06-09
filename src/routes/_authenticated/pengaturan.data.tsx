@@ -3,10 +3,10 @@ import { useRef } from "react";
 import { ArrowLeft, Download, Upload } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
-import { exportAllData, importAllData } from "@/lib/budget-store";
+import { exportAllData, importAllData } from "@/lib/cloud-store";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/pengaturan/data")({
+export const Route = createFileRoute("/_authenticated/pengaturan/data")({
   component: DataPage,
 });
 

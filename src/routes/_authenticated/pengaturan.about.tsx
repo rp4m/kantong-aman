@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Heart } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 
-export const Route = createFileRoute("/pengaturan/about")({
+export const Route = createFileRoute("/_authenticated/pengaturan/about")({
   component: AboutPage,
 });
 

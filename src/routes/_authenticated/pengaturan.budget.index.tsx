@@ -18,13 +18,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   useBudgetPeriods, useBudgetItems,
   addBudgetPeriod, updateBudgetPeriod, deleteBudgetPeriod, cloneBudgetPeriod,
-} from "@/lib/budget-store";
+} from "@/lib/cloud-store";
 import type { BudgetPeriod, BudgetPeriodStatus } from "@/lib/budget-types";
 import { formatRupiah, formatDateRange, todayISO } from "@/lib/budget-format";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/pengaturan/budget/")({
+export const Route = createFileRoute("/_authenticated/pengaturan/budget/")({
   component: BudgetListPage,
 });
 

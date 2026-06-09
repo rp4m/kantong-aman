@@ -14,24 +14,24 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useCategories, addCategory, updateCategory, deleteCategory } from "@/lib/budget-store";
-import type { Category } from "@/lib/budget-types";
+import { usePICs, addPIC, updatePIC, deletePIC } from "@/lib/cloud-store";
+import type { PIC } from "@/lib/budget-types";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/pengaturan/kategori")({
-  component: KategoriPage,
+export const Route = createFileRoute("/_authenticated/pengaturan/pic")({
+  component: PICPage,
 });
 
-function KategoriPage() {
-  const categories = useCategories();
+function PICPage() {
+  const pics = usePICs();
   const [openForm, setOpenForm] = useState(false);
-  const [editing, setEditing] = useState<Category | null>(null);
+  const [editing, setEditing] = useState<PIC | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   return (
     <AppShell
-      title="Kategori"
-      subtitle={`${categories.length} kategori`}
+      title="PIC"
+      subtitle={`${pics.length} PIC`}
       action={
         <Button size="sm" className="rounded-full" onClick={() => { setEditing(null); setOpenForm(true); }}>
           <Plus className="mr-1 h-4 w-4" /> Tambah
@@ -43,33 +43,38 @@ function KategoriPage() {
       </Link>
 
       <ul className="space-y-2">
-        {categories.map((c) => (
-          <li key={c.id} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 shadow-sm">
+        {pics.map((p) => (
+          <li key={p.id} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 shadow-sm">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+              {p.name.charAt(0).toUpperCase()}
+            </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
-                <p className="truncate text-sm font-semibold">{c.name}</p>
-                {!c.isActive && <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px]">Nonaktif</span>}
+                <p className="truncate text-sm font-semibold">{p.name}</p>
+                {!p.isActive && <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px]">Nonaktif</span>}
               </div>
-              {c.description && <p className="truncate text-xs text-muted-foreground">{c.description}</p>}
+              <p className="truncate text-xs text-muted-foreground">
+                {p.email || p.phone || p.description || "—"}
+              </p>
             </div>
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setEditing(c); setOpenForm(true); }}>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setEditing(p); setOpenForm(true); }}>
               <Pencil className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-expense" onClick={() => setDeleteId(c.id)}>
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-expense" onClick={() => setDeleteId(p.id)}>
               <Trash2 className="h-4 w-4" />
             </Button>
           </li>
         ))}
       </ul>
 
-      <CategoryFormDialog open={openForm} onOpenChange={setOpenForm} initial={editing} />
+      <PICFormDialog open={openForm} onOpenChange={setOpenForm} initial={editing} />
 
       <AlertDialog open={!!deleteId} onOpenChange={(v) => !v && setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Hapus kategori?</AlertDialogTitle>
+            <AlertDialogTitle>Hapus PIC?</AlertDialogTitle>
             <AlertDialogDescription>
-              Budget item terkait akan ikut terhapus. Transaksi yang sudah ada tidak terhapus.
+              Budget item yang dimiliki PIC ini akan dipindahkan ke PIC pertama yang tersisa.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -77,7 +82,10 @@ function KategoriPage() {
             <AlertDialogAction
               className="bg-expense text-expense-foreground hover:bg-expense/90"
               onClick={() => {
-                if (deleteId) { deleteCategory(deleteId); toast.success("Kategori dihapus"); setDeleteId(null); }
+                if (!deleteId) return;
+                try { deletePIC(deleteId); toast.success("PIC dihapus"); }
+                catch (e) { toast.error((e as Error).message); }
+                setDeleteId(null);
               }}
             >Hapus</AlertDialogAction>
           </AlertDialogFooter>
@@ -87,27 +95,33 @@ function KategoriPage() {
   );
 }
 
-function CategoryFormDialog({
+function PICFormDialog({
   open, onOpenChange, initial,
-}: { open: boolean; onOpenChange: (v: boolean) => void; initial: Category | null }) {
+}: { open: boolean; onOpenChange: (v: boolean) => void; initial: PIC | null }) {
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [description, setDescription] = useState("");
   const [isActive, setIsActive] = useState(true);
 
   useEffect(() => {
     if (!open) return;
-    if (initial) { setName(initial.name); setDescription(initial.description); setIsActive(initial.isActive); }
-    else { setName(""); setDescription(""); setIsActive(true); }
+    if (initial) {
+      setName(initial.name); setEmail(initial.email); setPhone(initial.phone);
+      setDescription(initial.description); setIsActive(initial.isActive);
+    } else {
+      setName(""); setEmail(""); setPhone(""); setDescription(""); setIsActive(true);
+    }
   }, [open, initial]);
 
   const submit = () => {
     try {
       if (initial) {
-        updateCategory(initial.id, { name, description: description.trim(), isActive });
-        toast.success("Kategori diperbarui");
+        updatePIC(initial.id, { name, email, phone, description, isActive });
+        toast.success("PIC diperbarui");
       } else {
-        addCategory({ name, description, isActive });
-        toast.success("Kategori ditambahkan");
+        addPIC({ name, email, phone, description, isActive });
+        toast.success("PIC ditambahkan");
       }
       onOpenChange(false);
     } catch (e) { toast.error((e as Error).message); }
@@ -117,13 +131,23 @@ function CategoryFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{initial ? "Edit Kategori" : "Tambah Kategori"}</DialogTitle>
-          <DialogDescription>Kategori dipakai pada budget item & transaksi.</DialogDescription>
+          <DialogTitle>{initial ? "Edit PIC" : "Tambah PIC"}</DialogTitle>
+          <DialogDescription>PIC ditugaskan ke budget item.</DialogDescription>
         </DialogHeader>
         <div className="space-y-3 py-2">
           <div className="space-y-1.5">
             <Label>Nama</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Misal: Konsumsi" />
+            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Misal: Andi" />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1.5">
+              <Label>Email</Label>
+              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Telepon</Label>
+              <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+            </div>
           </div>
           <div className="space-y-1.5">
             <Label>Deskripsi</Label>
