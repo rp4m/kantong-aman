@@ -32,59 +32,49 @@ type FilterKey = "today" | "month" | "year" | "custom";
 function rangeFor(
   key: FilterKey,
   custom?: { from: Date; to: Date }
-): { start: string; end: string; label: string } {
+): { start: Date; end: Date; label: string } {
   const now = new Date();
 
   switch (key) {
     case "today": {
-      const date = todayISO();
+      const now = new Date(); now.setHours(0, 0, 0, 0);
       return {
-        start: date,
-        end: date,
-        label: formatDate(date),
+        start: now,
+        end: now,
+        label: formatDate(now),
       };
     }
 
     case "month": {
-      const start = toISODate(startOfMonth(now));
-      const end = toISODate(endOfMonth(now));
-
       return {
-        start,
-        end,
-        label: formatDateRange(start, end),
+        start: from,
+        end: to,
+        label: formatDateRange(from, to),
       };
     }
 
     case "year": {
-      const start = toISODate(startOfYear(now));
-      const end = toISODate(endOfYear(now));
-
       return {
-        start,
-        end,
-        label: String(now.getFullYear()),
+        start: from,
+        end: to,
+        label: String(from.getFullYear()),
       };
     }
 
     case "custom": {
       if (!custom) {
-        const date = todayISO();
-
+        const now = new Date(); now.setHours(0, 0, 0, 0);
         return {
-          start: date,
-          end: date,
-          label: formatDate(date),
+          start: now,
+          end: now,
+          label: formatDate(now),
         };
       }
-
-      const start = toISODate(custom.from);
-      const end = toISODate(custom.to);
-
+      
       return {
-        start,
-        end,
-        label: formatDateRange(start, end),
+        start: from,
+        end: to,
+        label: formatDateRange(from, to),
       };
     }
   }
