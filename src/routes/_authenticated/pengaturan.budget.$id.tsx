@@ -20,6 +20,7 @@ import {
   addBudgetItem, updateBudgetItem, deleteBudgetItem, getRealizationForItem,
 } from "@/lib/cloud-store";
 import type { BudgetItem } from "@/lib/budget-types";
+import { CollaboratorsSection } from "@/components/CollaboratorsSection";
 import { formatRupiah, formatDateRange } from "@/lib/budget-format";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -81,6 +82,9 @@ function BudgetDetailPage() {
       <Link to="/pengaturan/budget" className="mb-3 inline-flex items-center gap-1 text-xs font-medium text-muted-foreground">
         <ArrowLeft className="h-3.5 w-3.5" /> Daftar Budget
       </Link>
+
+      <CollaboratorsSection budgetPeriodId={id} />
+
 
       <section className="rounded-2xl bg-gradient-to-br from-primary via-primary to-balance p-5 text-primary-foreground shadow-lg">
         <p className="text-xs uppercase tracking-wider opacity-80">Total Budget</p>
