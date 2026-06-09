@@ -269,18 +269,10 @@ function HomePage() {
             <TabsTrigger value="year">Tahun Ini</TabsTrigger>
             <TabsTrigger value="custom">
               Custom
-            </TabsTrigger>
-            
-            {filterKey === "custom" && (
+              {filterKey === "custom" && (
               <Popover open={calOpen} onOpenChange={setCalOpen}>
                 <PopoverTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="ml-1 h-7 px-2"
-                  >
                     <ChevronDown className="h-3 w-3" />
-                  </Button>
                 </PopoverTrigger>
             
                 <PopoverContent className="w-80">
@@ -326,6 +318,7 @@ function HomePage() {
                 </PopoverContent>
               </Popover>
             )}
+            </TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
