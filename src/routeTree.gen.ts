@@ -9,38 +9,196 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TransaksiRouteImport } from './routes/transaksi'
+import { Route as PengaturanRouteImport } from './routes/pengaturan'
+import { Route as LaporanRouteImport } from './routes/laporan'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PengaturanIndexRouteImport } from './routes/pengaturan.index'
+import { Route as PengaturanPicRouteImport } from './routes/pengaturan.pic'
+import { Route as PengaturanKategoriRouteImport } from './routes/pengaturan.kategori'
+import { Route as PengaturanDataRouteImport } from './routes/pengaturan.data'
+import { Route as PengaturanAplikasiRouteImport } from './routes/pengaturan.aplikasi'
+import { Route as PengaturanAboutRouteImport } from './routes/pengaturan.about'
+import { Route as PengaturanBudgetIndexRouteImport } from './routes/pengaturan.budget.index'
+import { Route as PengaturanBudgetIdRouteImport } from './routes/pengaturan.budget.$id'
 
+const TransaksiRoute = TransaksiRouteImport.update({
+  id: '/transaksi',
+  path: '/transaksi',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PengaturanRoute = PengaturanRouteImport.update({
+  id: '/pengaturan',
+  path: '/pengaturan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LaporanRoute = LaporanRouteImport.update({
+  id: '/laporan',
+  path: '/laporan',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PengaturanIndexRoute = PengaturanIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PengaturanRoute,
+} as any)
+const PengaturanPicRoute = PengaturanPicRouteImport.update({
+  id: '/pic',
+  path: '/pic',
+  getParentRoute: () => PengaturanRoute,
+} as any)
+const PengaturanKategoriRoute = PengaturanKategoriRouteImport.update({
+  id: '/kategori',
+  path: '/kategori',
+  getParentRoute: () => PengaturanRoute,
+} as any)
+const PengaturanDataRoute = PengaturanDataRouteImport.update({
+  id: '/data',
+  path: '/data',
+  getParentRoute: () => PengaturanRoute,
+} as any)
+const PengaturanAplikasiRoute = PengaturanAplikasiRouteImport.update({
+  id: '/aplikasi',
+  path: '/aplikasi',
+  getParentRoute: () => PengaturanRoute,
+} as any)
+const PengaturanAboutRoute = PengaturanAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => PengaturanRoute,
+} as any)
+const PengaturanBudgetIndexRoute = PengaturanBudgetIndexRouteImport.update({
+  id: '/budget/',
+  path: '/budget/',
+  getParentRoute: () => PengaturanRoute,
+} as any)
+const PengaturanBudgetIdRoute = PengaturanBudgetIdRouteImport.update({
+  id: '/budget/$id',
+  path: '/budget/$id',
+  getParentRoute: () => PengaturanRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/laporan': typeof LaporanRoute
+  '/pengaturan': typeof PengaturanRouteWithChildren
+  '/transaksi': typeof TransaksiRoute
+  '/pengaturan/about': typeof PengaturanAboutRoute
+  '/pengaturan/aplikasi': typeof PengaturanAplikasiRoute
+  '/pengaturan/data': typeof PengaturanDataRoute
+  '/pengaturan/kategori': typeof PengaturanKategoriRoute
+  '/pengaturan/pic': typeof PengaturanPicRoute
+  '/pengaturan/': typeof PengaturanIndexRoute
+  '/pengaturan/budget/$id': typeof PengaturanBudgetIdRoute
+  '/pengaturan/budget/': typeof PengaturanBudgetIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/laporan': typeof LaporanRoute
+  '/transaksi': typeof TransaksiRoute
+  '/pengaturan/about': typeof PengaturanAboutRoute
+  '/pengaturan/aplikasi': typeof PengaturanAplikasiRoute
+  '/pengaturan/data': typeof PengaturanDataRoute
+  '/pengaturan/kategori': typeof PengaturanKategoriRoute
+  '/pengaturan/pic': typeof PengaturanPicRoute
+  '/pengaturan': typeof PengaturanIndexRoute
+  '/pengaturan/budget/$id': typeof PengaturanBudgetIdRoute
+  '/pengaturan/budget': typeof PengaturanBudgetIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/laporan': typeof LaporanRoute
+  '/pengaturan': typeof PengaturanRouteWithChildren
+  '/transaksi': typeof TransaksiRoute
+  '/pengaturan/about': typeof PengaturanAboutRoute
+  '/pengaturan/aplikasi': typeof PengaturanAplikasiRoute
+  '/pengaturan/data': typeof PengaturanDataRoute
+  '/pengaturan/kategori': typeof PengaturanKategoriRoute
+  '/pengaturan/pic': typeof PengaturanPicRoute
+  '/pengaturan/': typeof PengaturanIndexRoute
+  '/pengaturan/budget/$id': typeof PengaturanBudgetIdRoute
+  '/pengaturan/budget/': typeof PengaturanBudgetIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/laporan'
+    | '/pengaturan'
+    | '/transaksi'
+    | '/pengaturan/about'
+    | '/pengaturan/aplikasi'
+    | '/pengaturan/data'
+    | '/pengaturan/kategori'
+    | '/pengaturan/pic'
+    | '/pengaturan/'
+    | '/pengaturan/budget/$id'
+    | '/pengaturan/budget/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/laporan'
+    | '/transaksi'
+    | '/pengaturan/about'
+    | '/pengaturan/aplikasi'
+    | '/pengaturan/data'
+    | '/pengaturan/kategori'
+    | '/pengaturan/pic'
+    | '/pengaturan'
+    | '/pengaturan/budget/$id'
+    | '/pengaturan/budget'
+  id:
+    | '__root__'
+    | '/'
+    | '/laporan'
+    | '/pengaturan'
+    | '/transaksi'
+    | '/pengaturan/about'
+    | '/pengaturan/aplikasi'
+    | '/pengaturan/data'
+    | '/pengaturan/kategori'
+    | '/pengaturan/pic'
+    | '/pengaturan/'
+    | '/pengaturan/budget/$id'
+    | '/pengaturan/budget/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LaporanRoute: typeof LaporanRoute
+  PengaturanRoute: typeof PengaturanRouteWithChildren
+  TransaksiRoute: typeof TransaksiRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/transaksi': {
+      id: '/transaksi'
+      path: '/transaksi'
+      fullPath: '/transaksi'
+      preLoaderRoute: typeof TransaksiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pengaturan': {
+      id: '/pengaturan'
+      path: '/pengaturan'
+      fullPath: '/pengaturan'
+      preLoaderRoute: typeof PengaturanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/laporan': {
+      id: '/laporan'
+      path: '/laporan'
+      fullPath: '/laporan'
+      preLoaderRoute: typeof LaporanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,12 +206,107 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pengaturan/': {
+      id: '/pengaturan/'
+      path: '/'
+      fullPath: '/pengaturan/'
+      preLoaderRoute: typeof PengaturanIndexRouteImport
+      parentRoute: typeof PengaturanRoute
+    }
+    '/pengaturan/pic': {
+      id: '/pengaturan/pic'
+      path: '/pic'
+      fullPath: '/pengaturan/pic'
+      preLoaderRoute: typeof PengaturanPicRouteImport
+      parentRoute: typeof PengaturanRoute
+    }
+    '/pengaturan/kategori': {
+      id: '/pengaturan/kategori'
+      path: '/kategori'
+      fullPath: '/pengaturan/kategori'
+      preLoaderRoute: typeof PengaturanKategoriRouteImport
+      parentRoute: typeof PengaturanRoute
+    }
+    '/pengaturan/data': {
+      id: '/pengaturan/data'
+      path: '/data'
+      fullPath: '/pengaturan/data'
+      preLoaderRoute: typeof PengaturanDataRouteImport
+      parentRoute: typeof PengaturanRoute
+    }
+    '/pengaturan/aplikasi': {
+      id: '/pengaturan/aplikasi'
+      path: '/aplikasi'
+      fullPath: '/pengaturan/aplikasi'
+      preLoaderRoute: typeof PengaturanAplikasiRouteImport
+      parentRoute: typeof PengaturanRoute
+    }
+    '/pengaturan/about': {
+      id: '/pengaturan/about'
+      path: '/about'
+      fullPath: '/pengaturan/about'
+      preLoaderRoute: typeof PengaturanAboutRouteImport
+      parentRoute: typeof PengaturanRoute
+    }
+    '/pengaturan/budget/': {
+      id: '/pengaturan/budget/'
+      path: '/budget'
+      fullPath: '/pengaturan/budget/'
+      preLoaderRoute: typeof PengaturanBudgetIndexRouteImport
+      parentRoute: typeof PengaturanRoute
+    }
+    '/pengaturan/budget/$id': {
+      id: '/pengaturan/budget/$id'
+      path: '/budget/$id'
+      fullPath: '/pengaturan/budget/$id'
+      preLoaderRoute: typeof PengaturanBudgetIdRouteImport
+      parentRoute: typeof PengaturanRoute
+    }
   }
 }
 
+interface PengaturanRouteChildren {
+  PengaturanAboutRoute: typeof PengaturanAboutRoute
+  PengaturanAplikasiRoute: typeof PengaturanAplikasiRoute
+  PengaturanDataRoute: typeof PengaturanDataRoute
+  PengaturanKategoriRoute: typeof PengaturanKategoriRoute
+  PengaturanPicRoute: typeof PengaturanPicRoute
+  PengaturanIndexRoute: typeof PengaturanIndexRoute
+  PengaturanBudgetIdRoute: typeof PengaturanBudgetIdRoute
+  PengaturanBudgetIndexRoute: typeof PengaturanBudgetIndexRoute
+}
+
+const PengaturanRouteChildren: PengaturanRouteChildren = {
+  PengaturanAboutRoute: PengaturanAboutRoute,
+  PengaturanAplikasiRoute: PengaturanAplikasiRoute,
+  PengaturanDataRoute: PengaturanDataRoute,
+  PengaturanKategoriRoute: PengaturanKategoriRoute,
+  PengaturanPicRoute: PengaturanPicRoute,
+  PengaturanIndexRoute: PengaturanIndexRoute,
+  PengaturanBudgetIdRoute: PengaturanBudgetIdRoute,
+  PengaturanBudgetIndexRoute: PengaturanBudgetIndexRoute,
+}
+
+const PengaturanRouteWithChildren = PengaturanRoute._addFileChildren(
+  PengaturanRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LaporanRoute: LaporanRoute,
+  PengaturanRoute: PengaturanRouteWithChildren,
+  TransaksiRoute: TransaksiRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
