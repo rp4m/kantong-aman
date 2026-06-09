@@ -182,7 +182,8 @@ function HomePage() {
     })).sort((a, b) => b.budget - a.budget);
 
     // Recent transactions
-    const recent = [...filteredTransactions]
+    const recent = [...transactions]
+      .filter((t) => (t as any).budgetPeriodId && filteredPeriodIds.has((t as any).budgetPeriodId))
       .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.createdAt.localeCompare(a.createdAt)))
       .slice(0, 5);
 
