@@ -254,13 +254,7 @@ function HomePage() {
           value={filterKey}
           onValueChange={(v) => {
             const key = v as FilterKey;
-        
             setFilterKey(key);
-        
-            if (key === "custom") {
-              setTempRange(customRange);
-              setCalOpen(true);
-            }
           }}
         >
           <TabsList className="grid w-full grid-cols-4">
@@ -269,58 +263,17 @@ function HomePage() {
             <TabsTrigger value="year">Tahun Ini</TabsTrigger>
             <TabsTrigger value="custom" className="gap-1">
               Custom
-              {filterKey === "custom" && (
-                <Popover open={calOpen} onOpenChange={setCalOpen}>
-                  <PopoverTrigger asChild>
-                    <ChevronDown className="h-3 w-3" />
-                  </PopoverTrigger>
-                <PopoverContent className="w-80">
-                  <div className="space-y-4">
-                    <div>
-                      <Label>Tanggal Mulai</Label>
-                      <Input
-                        type="date"
-                        value={tempRange?.from ? toISODate(tempRange.from) : ""}
-                        onChange={(e) =>
-                          setTempRange((prev) => ({
-                            ...prev,
-                            from: new Date(e.target.value),
-                          }))
-                        }
-                      />
-                    </div>
-                
-                    <div>
-                      <Label>Tanggal Selesai</Label>
-                      <Input
-                        type="date"
-                        value={tempRange?.to ? toISODate(tempRange.to) : ""}
-                        onChange={(e) =>
-                          setTempRange((prev) => ({
-                            ...prev,
-                            to: new Date(e.target.value),
-                          }))
-                        }
-                      />
-                    </div>
-                
-                    <Button
-                      className="w-full"
-                      onClick={() => {
-                        setCustomRange(tempRange);
-                        setCalOpen(false);
-                      }}
-                    >
-                      Simpan
-                    </Button>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            )}
             </TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
+
+      {filter === "custom" && (
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          <Input type="date" value={range.start} onChange={(e) => setCustomRange({ from: new Date(e.target.value), to: new Date(range.end) })} />
+          <Input type="date" value={range.end} onChange={(e) => setCustomRange({ from: new Date(range.start), to: new Date(e.target.value) })} />
+        </div>
+      )}
 
       {filteredPeriods.length === 0 ? (
         <div className="mt-4 rounded-2xl border border-dashed border-border bg-card p-8 text-center">
