@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { ArrowLeft, Plus, Copy, Pencil, Trash2, Calendar } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
@@ -152,10 +152,10 @@ function BudgetListPage() {
             <AlertDialogCancel>Batal</AlertDialogCancel>
             <AlertDialogAction
               className="bg-expense text-expense-foreground hover:bg-expense/90"
-              onClick={() => {
+              onClick={async () => {
                 if (deleteId) {
-                  deleteBudgetPeriod(deleteId);
-                  toast.success("Periode dihapus");
+                  try { await deleteBudgetPeriod(deleteId); toast.success("Periode dihapus"); }
+                  catch (e) { toast.error((e as Error).message); }
                   setDeleteId(null);
                 }
               }}
@@ -176,7 +176,7 @@ function PeriodFormDialog({
   const [endDate, setEndDate] = useState("");
   const [status, setStatus] = useState<BudgetPeriodStatus>("active");
 
-  useMemo(() => {
+  useEffect(() => {
     if (open) {
       if (initial) {
         setName(initial.name); setDescription(initial.description);
@@ -193,13 +193,13 @@ function PeriodFormDialog({
     }
   }, [open, initial]);
 
-  const submit = () => {
+  const submit = async () => {
     try {
       if (initial) {
-        updateBudgetPeriod(initial.id, { name: name.trim(), description, startDate, endDate, status });
+        await updateBudgetPeriod(initial.id, { name: name.trim(), description, startDate, endDate, status });
         toast.success("Budget diperbarui");
       } else {
-        addBudgetPeriod({ name, description, startDate, endDate, status });
+        await addBudgetPeriod({ name, description, startDate, endDate, status });
         toast.success("Budget dibuat");
       }
       onOpenChange(false);
@@ -269,9 +269,9 @@ function CloneDialog({
   const [cloneAssignments, setCloneAssignments] = useState(true);
   const [cloneAmounts, setCloneAmounts] = useState(true);
 
-  const submit = () => {
+  const submit = async () => {
     try {
-      cloneBudgetPeriod(
+      await cloneBudgetPeriod(
         sourceId,
         { name, startDate, endDate, status: "active" },
         { cloneCategories, cloneAssignments, cloneAmounts },

@@ -23,8 +23,16 @@ let picCache: PIC[] = [];
 let periodCache: BudgetPeriod[] = [];
 let itemCache: BudgetItem[] = [];
 let collaboratorCache: Collaborator[] = [];
+let profileCache: UserProfile[] = [];
 let currentUserId: string | null = null;
 let currentUserEmail: string | null = null;
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  fullName: string;
+  avatarUrl: string | null;
+}
 
 export interface Collaborator {
   id: string;
@@ -81,16 +89,21 @@ const toCollab = (r: any): Collaborator => ({
   acceptedAt: r.accepted_at,
 });
 
+const toProfile = (r: any): UserProfile => ({
+  id: r.id, email: r.email ?? "", fullName: r.full_name ?? "", avatarUrl: r.avatar_url ?? null,
+});
+
 // =================== Fetch all ===================
 
 async function fetchAll(userId: string) {
-  const [tx, cat, pic, periods, items, collab] = await Promise.all([
+  const [tx, cat, pic, periods, items, collab, profs] = await Promise.all([
     supabase.from("transactions").select("*").order("date", { ascending: false }),
     supabase.from("categories").select("*").order("created_at", { ascending: false }),
     supabase.from("pics").select("*").order("created_at", { ascending: false }),
     supabase.from("budget_periods").select("*").order("created_at", { ascending: false }),
     supabase.from("budget_items").select("*").order("created_at", { ascending: false }),
     supabase.from("budget_collaborators").select("*"),
+    supabase.from("profiles").select("*"),
   ]);
   txCache = (tx.data ?? []).map(toTx);
   categoryCache = (cat.data ?? []).map(toCat);
@@ -98,6 +111,7 @@ async function fetchAll(userId: string) {
   periodCache = (periods.data ?? []).map(toPeriod);
   itemCache = (items.data ?? []).map(toItem);
   collaboratorCache = (collab.data ?? []).map(toCollab);
+  profileCache = (profs.data ?? []).map(toProfile);
 
   // Seed defaults if first time
   if (picCache.length === 0) {
@@ -156,6 +170,9 @@ export function CloudDataProvider({ children }: { children: ReactNode }) {
       .on("postgres_changes", { event: "*", schema: "public", table: "budget_collaborators" }, async () => {
         if (currentUserId) await refreshSlice("collaborators");
       })
+      .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, async () => {
+        if (currentUserId) await refreshSlice("profiles");
+      })
       .subscribe();
 
     return () => { cancelled = true; supabase.removeChannel(channel); };
@@ -167,7 +184,7 @@ export function CloudDataProvider({ children }: { children: ReactNode }) {
   return <Ctx.Provider value={me}>{children}</Ctx.Provider>;
 }
 
-async function refreshSlice(slice: "transactions" | "categories" | "pics" | "budget_periods" | "budget_items" | "collaborators") {
+async function refreshSlice(slice: "transactions" | "categories" | "pics" | "budget_periods" | "budget_items" | "collaborators" | "profiles") {
   if (slice === "transactions") {
     const { data } = await supabase.from("transactions").select("*").order("date", { ascending: false });
     txCache = (data ?? []).map(toTx);
@@ -186,6 +203,9 @@ async function refreshSlice(slice: "transactions" | "categories" | "pics" | "bud
   } else if (slice === "collaborators") {
     const { data } = await supabase.from("budget_collaborators").select("*");
     collaboratorCache = (data ?? []).map(toCollab);
+  } else if (slice === "profiles") {
+    const { data } = await supabase.from("profiles").select("*");
+    profileCache = (data ?? []).map(toProfile);
   }
   emit();
 }
@@ -212,6 +232,10 @@ export function useBudgetItems(): BudgetItem[] {
 export function useCollaborators(): Collaborator[] {
   return useSyncExternalStore(subscribe, () => collaboratorCache, () => EMPTY);
 }
+export function useProfiles(): UserProfile[] {
+  return useSyncExternalStore(subscribe, () => profileCache, () => EMPTY);
+}
+export const getProfileById = (id: string | null | undefined) => id ? profileCache.find((p) => p.id === id) : undefined;
 
 // =================== Read helpers ===================
 
