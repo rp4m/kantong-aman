@@ -246,49 +246,40 @@ function HomePage() {
     >
       {/* Date filter tabs */}
       <div className="space-y-2">
-        <Tabs
-          value={filterKey}
-          onValueChange={(v) => {
-            const key = v as FilterKey;
-            setFilterKey(key);
-          }}
-        >
+        <Tabs value={filterKey} onValueChange={(v) => setFilterKey(v as FilterKey)}>
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="today">Hari Ini</TabsTrigger>
             <TabsTrigger value="month">Bulan Ini</TabsTrigger>
             <TabsTrigger value="year">Tahun Ini</TabsTrigger>
-            <TabsTrigger value="custom" className="gap-1">
-              Custom
-            </TabsTrigger>
+            <TabsTrigger value="custom">Custom</TabsTrigger>
           </TabsList>
         </Tabs>
+        {filterKey === "custom" && (
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            <Input
+              type="date"
+              value={range.start}
+              onChange={(e) =>
+                setCustomRange((prev) => ({
+                  ...prev,
+                  from: new Date(e.target.value),
+                }))
+              }
+            />
+            
+            <Input
+              type="date"
+              value={range.end}
+              onChange={(e) =>
+                setCustomRange((prev) => ({
+                  ...prev,
+                  to: new Date(e.target.value),
+                }))
+              }
+            />
+          </div>
+        )}
       </div>
-
-      {filter === "custom" && (
-        <div className="mt-2 grid grid-cols-2 gap-2">
-          <Input
-            type="date"
-            value={range.start}
-            onChange={(e) =>
-              setCustomRange((prev) => ({
-                ...prev,
-                from: new Date(e.target.value),
-              }))
-            }
-          />
-          
-          <Input
-            type="date"
-            value={range.end}
-            onChange={(e) =>
-              setCustomRange((prev) => ({
-                ...prev,
-                to: new Date(e.target.value),
-              }))
-            }
-          />
-        </div>
-      )}
 
       {filteredPeriods.length === 0 ? (
         <div className="mt-4 rounded-2xl border border-dashed border-border bg-card p-8 text-center">
