@@ -1,23 +1,21 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import {
-  ArrowDownLeft, ArrowUpRight, Plus, PiggyBank, Wallet,
-  AlertTriangle, Users, Calendar as CalendarIcon, ChevronRight,
-} from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Plus, PiggyBank, Wallet, TriangleAlert as AlertTriangle, Users, Calendar as CalendarIcon, ChevronRight, ChevronDown } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { StatCard } from "@/components/StatCard";
 import { TransactionFormDialog } from "@/components/TransactionFormDialog";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import {
   useTransactions, useCategories, usePICs, useBudgetPeriods, useBudgetItems,
   useCurrentUser,
 } from "@/lib/cloud-store";
-import { formatRupiah, formatRupiahShort, formatDate, formatDateRange } from "@/lib/budget-format";
+import { formatRupiah, formatRupiahShort, formatDate, formatDateRange, todayISO, toISODate } from "@/lib/budget-format";
 import { cn } from "@/lib/utils";
+import { startOfMonth, endOfMonth, startOfYear, endOfYear, subDays, format } from "date-fns";
 
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
@@ -29,6 +27,30 @@ export const Route = createFileRoute("/_authenticated/")({
   component: HomePage,
 });
 
+type FilterKey = "today" | "month" | "year" | "custom";
+
+function rangeFor(key: FilterKey, custom?: { from: Date; to: Date }) {
+  const now = new Date();
+  switch (key) {
+    case "today":
+      return { start: todayISO(), end: todayISO() };
+    case "month":
+      return {
+        start: toISODate(startOfMonth(now)),
+        end: toISODate(endOfMonth(now)),
+      };
+    case "year":
+      return {
+        start: toISODate(startOfYear(now)),
+        end: toISODate(endOfYear(now)),
+      };
+    case "custom": {
+      if (!custom) return { start: todayISO(), end: todayISO() };
+      return { start: toISODate(custom.from), end: toISODate(custom.to) };
+    }
+  }
+}
+
 function HomePage() {
   const transactions = useTransactions();
   const categories = useCategories();
@@ -37,19 +59,60 @@ function HomePage() {
   const items = useBudgetItems();
 
   const [openForm, setOpenForm] = useState(false);
-  const [selectedPeriodId, setSelectedPeriodId] = useState<string>("");
+  const [filterKey, setFilterKey] = useState<FilterKey>("month");
+  const [customRange, setCustomRange] = useState<{ from: Date; to: Date }>({
+    from: startOfMonth(new Date()),
+    to: endOfMonth(new Date()),
+  });
+  const [calOpen, setCalOpen] = useState(false);
 
-  const activePeriods = useMemo(
-    () => periods.filter((p) => p.status === "active").sort((a, b) => b.startDate.localeCompare(a.startDate)),
-    [periods],
+  const range = useMemo(() => rangeFor(filterKey, customRange), [filterKey, customRange]);
+
+  // Budgets whose period overlaps with the selected date range
+  const filteredPeriods = useMemo(() => {
+    const { start, end } = range;
+    return periods.filter((p) => {
+      // overlap: p.startDate <= end AND p.endDate >= start
+      return p.startDate <= end && p.endDate >= start;
+    }).sort((a, b) => a.startDate.localeCompare(b.startDate));
+  }, [periods, range]);
+
+  // All budget items belonging to filtered periods
+  const filteredPeriodIds = useMemo(() => new Set(filteredPeriods.map((p) => p.id)), [filteredPeriods]);
+
+  const filteredItems = useMemo(
+    () => items.filter((it) => filteredPeriodIds.has(it.budgetPeriodId)),
+    [items, filteredPeriodIds],
   );
 
-  const periodId = selectedPeriodId || activePeriods[0]?.id || "";
+  // All transactions belonging to filtered budgets (via budgetPeriodId or via item matching)
+  const filteredTransactions = useMemo(() => {
+    const { start, end } = range;
+    const filteredItemIds = new Set(filteredItems.map((it) => it.id));
 
-  const period = useMemo(() => periods.find((p) => p.id === periodId), [periods, periodId]);
+    return transactions.filter((t) => {
+      // Must be within the date range
+      if (t.date < start || t.date > end) return false;
+      // Must belong to one of the filtered budgets
+      // Check via budgetItemId
+      if (t.budgetItemId && filteredItemIds.has(t.budgetItemId)) return true;
+      // Check via budgetPeriodId
+      if ((t as any).budgetPeriodId && filteredPeriodIds.has((t as any).budgetPeriodId)) return true;
+      // For expense: match by category to a filtered item
+      if (t.type === "expense") {
+        const cat = categories.find((c) => c.name === t.category);
+        if (cat && filteredItems.some((it) => it.categoryId === cat.id)) return true;
+      }
+      // For income transactions linked to a filtered period
+      if (t.type === "income") {
+        if ((t as any).budgetPeriodId && filteredPeriodIds.has((t as any).budgetPeriodId)) return true;
+      }
+      return false;
+    });
+  }, [transactions, categories, filteredItems, filteredPeriodIds, range]);
 
   const data = useMemo(() => {
-    if (!period) {
+    if (filteredPeriods.length === 0) {
       return {
         totalBudget: 0, totalReal: 0, remaining: 0, util: 0,
         catRows: [], picRows: [], recent: [],
@@ -59,57 +122,56 @@ function HomePage() {
 
     const catById = new Map(categories.map((c) => [c.id, c]));
     const picById = new Map(pics.map((p) => [p.id, p]));
-    const periodItems = items.filter((it) => it.budgetPeriodId === period.id);
 
-    // Realization: match expense transactions to budget items within period date range
+    // Realization: match expense transactions to budget items
     const expByItem = new Map<string, number>();
-    transactions.forEach((t) => {
+    filteredTransactions.forEach((t) => {
       if (t.type !== "expense") return;
-      if (t.date < period.startDate || t.date > period.endDate) return;
-      if (t.budgetItemId && periodItems.some((it) => it.id === t.budgetItemId)) {
+      if (t.budgetItemId && filteredItems.some((it) => it.id === t.budgetItemId)) {
         expByItem.set(t.budgetItemId, (expByItem.get(t.budgetItemId) ?? 0) + t.amount);
       } else {
         const cat = categories.find((c) => c.name === t.category);
         if (!cat) return;
-        const match = periodItems.find((it) => it.categoryId === cat.id);
+        const match = filteredItems.find((it) => it.categoryId === cat.id);
         if (match) expByItem.set(match.id, (expByItem.get(match.id) ?? 0) + t.amount);
       }
     });
 
-    const totalBudget = periodItems.reduce((a, it) => a + it.amount, 0);
+    const totalBudget = filteredItems.reduce((a, it) => a + it.amount, 0);
     const totalReal = Array.from(expByItem.values()).reduce((a, v) => a + v, 0);
     const remaining = totalBudget - totalReal;
     const util = totalBudget > 0 ? (totalReal / totalBudget) * 100 : 0;
 
-    // All transactions within this budget period
-    const periodTx = transactions.filter(
-      (t) => t.date >= period.startDate && t.date <= period.endDate,
-    );
-    const totalIncome = periodTx.filter((t) => t.type === "income").reduce((a, t) => a + t.amount, 0);
-    const totalExpense = periodTx.filter((t) => t.type === "expense").reduce((a, t) => a + t.amount, 0);
+    const totalIncome = filteredTransactions.filter((t) => t.type === "income").reduce((a, t) => a + t.amount, 0);
+    const totalExpense = filteredTransactions.filter((t) => t.type === "expense").reduce((a, t) => a + t.amount, 0);
 
-    // Category aggregation
-    const catRows = periodItems.map((it) => {
+    // Category aggregation (deduplicate across periods by category+pic combo)
+    const catMap = new Map<string, { id: string; categoryName: string; picName: string; budget: number; actual: number }>();
+    filteredItems.forEach((it) => {
       const cat = catById.get(it.categoryId);
       const pic = picById.get(it.picId);
-      const real = expByItem.get(it.id) ?? 0;
-      const pct = it.amount > 0 ? (real / it.amount) * 100 : 0;
-      return {
-        id: it.id,
-        categoryName: cat?.name ?? "—",
-        picName: pic?.name ?? "—",
-        budget: it.amount,
-        actual: real,
-        sisa: it.amount - real,
-        pct,
+      const key = `${it.categoryId}-${it.picId}`;
+      const cur = catMap.get(key) ?? {
+        id: it.id, categoryName: cat?.name ?? "—", picName: pic?.name ?? "—",
+        budget: 0, actual: 0,
       };
-    }).sort((a, b) => b.budget - a.budget);
+      cur.budget += it.amount;
+      cur.actual += expByItem.get(it.id) ?? 0;
+      catMap.set(key, cur);
+    });
+
+    const catRows = Array.from(catMap.values()).map((r) => ({
+      ...r, sisa: r.budget - r.actual, pct: r.budget > 0 ? (r.actual / r.budget) * 100 : 0,
+    })).sort((a, b) => b.budget - a.budget);
 
     // PIC aggregation
     type PicRow = { id: string; name: string; budget: number; actual: number; sisa: number; pct: number; count: number };
     const picMap = new Map<string, PicRow>();
-    periodItems.forEach((it) => {
-      const cur = picMap.get(it.picId) ?? { id: it.picId, name: picById.get(it.picId)?.name ?? "—", budget: 0, actual: 0, sisa: 0, pct: 0, count: 0 };
+    filteredItems.forEach((it) => {
+      const cur = picMap.get(it.picId) ?? {
+        id: it.picId, name: picById.get(it.picId)?.name ?? "—",
+        budget: 0, actual: 0, sisa: 0, pct: 0, count: 0,
+      };
       cur.budget += it.amount;
       cur.actual += expByItem.get(it.id) ?? 0;
       cur.count += 1;
@@ -119,8 +181,8 @@ function HomePage() {
       ...r, sisa: r.budget - r.actual, pct: r.budget > 0 ? (r.actual / r.budget) * 100 : 0,
     })).sort((a, b) => b.budget - a.budget);
 
-    // Recent transactions within period
-    const recent = [...periodTx]
+    // Recent transactions
+    const recent = [...filteredTransactions]
       .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.createdAt.localeCompare(a.createdAt)))
       .slice(0, 5);
 
@@ -133,52 +195,85 @@ function HomePage() {
       overBudgetCats, nearLimitCats,
       totalIncome, totalExpense,
     };
-  }, [transactions, categories, pics, periods, items, period]);
+  }, [filteredPeriods, filteredItems, filteredTransactions, categories, pics]);
 
   const tone = data.util >= 100 ? "expense" : data.util >= 80 ? "warning" : "primary";
+
+  const filterLabel: Record<FilterKey, string> = {
+    today: "Hari Ini",
+    month: "Bulan Ini",
+    year: "Tahun Ini",
+    custom: "Custom",
+  };
 
   return (
     <AppShell
       title="Beranda"
-      subtitle={period ? period.name : "Kantong Aman"}
+      subtitle={`${filteredPeriods.length} budget aktif`}
       action={
         <Button size="sm" onClick={() => setOpenForm(true)} className="rounded-full">
           <Plus className="mr-1 h-4 w-4" /> Tambah
         </Button>
       }
     >
-      {/* Budget selector */}
-      <div className="space-y-1.5">
-        <label className="text-xs font-medium text-muted-foreground">Pilih Budget</label>
-        <Select value={periodId} onValueChange={setSelectedPeriodId}>
-          <SelectTrigger className="rounded-xl">
-            <SelectValue placeholder={activePeriods.length ? "Pilih budget aktif" : "Belum ada budget aktif"} />
-          </SelectTrigger>
-          <SelectContent>
-            {activePeriods.map((p) => (
-              <SelectItem key={p.id} value={p.id}>
-                {p.name} ({formatDateRange(p.startDate, p.endDate)})
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      {/* Date filter tabs */}
+      <div className="space-y-2">
+        <Tabs value={filterKey} onValueChange={(v) => setFilterKey(v as FilterKey)}>
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="today">Hari Ini</TabsTrigger>
+            <TabsTrigger value="month">Bulan Ini</TabsTrigger>
+            <TabsTrigger value="year">Tahun Ini</TabsTrigger>
+            <TabsTrigger value="custom" className="gap-1">
+              Custom
+              {filterKey === "custom" && (
+                <Popover open={calOpen} onOpenChange={setCalOpen}>
+                  <PopoverTrigger asChild>
+                    <ChevronDown className="h-3 w-3" />
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="range"
+                      selected={{ from: customRange.from, to: customRange.to }}
+                      onSelect={(range) => {
+                        if (range?.from && range?.to) {
+                          setCustomRange({ from: range.from, to: range.to });
+                          setCalOpen(false);
+                        }
+                      }}
+                      numberOfMonths={2}
+                    />
+                  </PopoverContent>
+                </Popover>
+              )}
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+        <p className="text-xs text-muted-foreground">
+          {formatDate(range.start)} – {formatDate(range.end)}
+        </p>
       </div>
 
-      {!period ? (
+      {filteredPeriods.length === 0 ? (
         <div className="mt-4 rounded-2xl border border-dashed border-border bg-card p-8 text-center">
           <CalendarIcon className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-          <p className="text-sm font-medium">Belum ada budget aktif</p>
-          <p className="mt-1 text-xs text-muted-foreground">Buat budget periode pertama Anda.</p>
+          <p className="text-sm font-medium">Tidak ada budget untuk periode ini</p>
+          <p className="mt-1 text-xs text-muted-foreground">Buat budget yang mencakup rentang tanggal yang dipilih.</p>
           <Link to="/pengaturan/budget" className="mt-3 inline-block">
             <Button size="sm"><Plus className="mr-1 h-4 w-4" /> Buat Budget</Button>
           </Link>
         </div>
       ) : (
         <>
-          {/* Period info */}
-          <p className="mt-2 text-xs text-muted-foreground">
-            {formatDateRange(period.startDate, period.endDate)}
-          </p>
+          {/* Filtered budget periods summary */}
+          {filteredPeriods.length > 1 && (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {filteredPeriods.map((p) => (
+                <span key={p.id} className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
+                  {p.name}
+                </span>
+              ))}
+            </div>
+          )}
 
           {/* Hero */}
           <div className="relative mt-4 overflow-hidden rounded-3xl bg-gradient-to-br from-primary via-primary to-balance p-5 text-primary-foreground shadow-lg">
@@ -206,7 +301,7 @@ function HomePage() {
             <StatCard label="Total Budget" value={data.totalBudget} tone="neutral" icon={Wallet} />
             <StatCard label="Realisasi" value={data.totalReal} tone="expense" icon={ArrowUpRight} />
             <StatCard label="Sisa Budget" value={data.remaining} tone={data.remaining < 0 ? "expense" : "balance"} icon={PiggyBank} />
-            <StatCard label="Utilisasi" value={Math.round(data.util)} tone={tone === "expense" ? "expense" : "neutral"} hint={`${data.util.toFixed(1)}%`} icon={ArrowDownLeft} />
+            <UtilCard value={Math.round(data.util)} tone={tone} />
           </div>
 
           {/* Insights */}
@@ -352,6 +447,35 @@ function HomePage() {
 
       <TransactionFormDialog open={openForm} onOpenChange={setOpenForm} />
     </AppShell>
+  );
+}
+
+function UtilCard({ value, tone }: { value: number; tone: string }) {
+  const itone = tone === "expense" ? "expense" : tone === "warning" ? "warning" : "primary";
+  return (
+    <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Utilisasi</p>
+          <p className={cn(
+            "mt-1 text-xl font-bold tracking-tight",
+            itone === "expense" && "text-expense",
+            itone === "warning" && "text-warning-foreground",
+            itone === "primary" && "text-primary",
+          )}>
+            {value}%
+          </p>
+        </div>
+        <div className={cn(
+          "flex h-10 w-10 items-center justify-center rounded-xl",
+          itone === "expense" && "bg-expense-soft text-expense",
+          itone === "warning" && "bg-warning/30 text-warning-foreground",
+          itone === "primary" && "bg-primary/15 text-primary",
+        )}>
+          <ArrowDownLeft className="h-5 w-5" />
+        </div>
+      </div>
+    </div>
   );
 }
 
