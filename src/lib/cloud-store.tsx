@@ -232,6 +232,10 @@ export function useBudgetItems(): BudgetItem[] {
 export function useCollaborators(): Collaborator[] {
   return useSyncExternalStore(subscribe, () => collaboratorCache, () => EMPTY);
 }
+export function useProfiles(): UserProfile[] {
+  return useSyncExternalStore(subscribe, () => profileCache, () => EMPTY);
+}
+export const getProfileById = (id: string | null | undefined) => id ? profileCache.find((p) => p.id === id) : undefined;
 
 // =================== Read helpers ===================
 
