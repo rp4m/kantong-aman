@@ -239,7 +239,7 @@ function HomePage() {
   return (
     <AppShell
       title="Beranda"
-      subtitle={`${range.label}` • ${filteredPeriods.length} budget aktif`}
+      subtitle={`${range.label} • ${filteredPeriods.length} budget aktif`}
       action={
         <Button size="sm" onClick={() => setOpenForm(true)} className="rounded-full">
           <Plus className="mr-1 h-4 w-4" /> Tambah
