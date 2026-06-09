@@ -269,9 +269,9 @@ function CloneDialog({
   const [cloneAssignments, setCloneAssignments] = useState(true);
   const [cloneAmounts, setCloneAmounts] = useState(true);
 
-  const submit = () => {
+  const submit = async () => {
     try {
-      cloneBudgetPeriod(
+      await cloneBudgetPeriod(
         sourceId,
         { name, startDate, endDate, status: "active" },
         { cloneCategories, cloneAssignments, cloneAmounts },
