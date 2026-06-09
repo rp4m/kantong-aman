@@ -250,7 +250,19 @@ function HomePage() {
     >
       {/* Date filter tabs */}
       <div className="space-y-2">
-        <Tabs value={filterKey} onValueChange={(v) => setFilterKey(v as FilterKey)}>
+        <Tabs
+          value={filterKey}
+          onValueChange={(v) => {
+            const key = v as FilterKey;
+        
+            setFilterKey(key);
+        
+            if (key === "custom") {
+              setTempRange(customRange);
+              setCalOpen(true);
+            }
+          }}
+        >
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="today">Hari Ini</TabsTrigger>
             <TabsTrigger value="month">Bulan Ini</TabsTrigger>
