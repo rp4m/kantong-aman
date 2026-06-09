@@ -23,8 +23,16 @@ let picCache: PIC[] = [];
 let periodCache: BudgetPeriod[] = [];
 let itemCache: BudgetItem[] = [];
 let collaboratorCache: Collaborator[] = [];
+let profileCache: UserProfile[] = [];
 let currentUserId: string | null = null;
 let currentUserEmail: string | null = null;
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  fullName: string;
+  avatarUrl: string | null;
+}
 
 export interface Collaborator {
   id: string;
