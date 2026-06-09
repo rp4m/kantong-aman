@@ -568,3 +568,7 @@ export function exportAllData(): string {
 export async function signOut() {
   await supabase.auth.signOut();
 }
+
+export function importAllData(_json: string) {
+  throw new Error("Import data tidak tersedia di mode cloud. Data tersimpan otomatis di server.");
+}
