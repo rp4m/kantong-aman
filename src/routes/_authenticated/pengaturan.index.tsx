@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Wallet, Tags, Users, Settings as SettingsIcon, Database, Info, ChevronRight } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 
-export const Route = createFileRoute("/pengaturan/")({
+export const Route = createFileRoute("/_authenticated/pengaturan/")({
   component: SettingsHub,
 });
 

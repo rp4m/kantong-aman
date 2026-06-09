@@ -9,126 +9,160 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TransaksiRouteImport } from './routes/transaksi'
-import { Route as PengaturanRouteImport } from './routes/pengaturan'
-import { Route as LaporanRouteImport } from './routes/laporan'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as PengaturanIndexRouteImport } from './routes/pengaturan.index'
-import { Route as PengaturanPicRouteImport } from './routes/pengaturan.pic'
-import { Route as PengaturanKategoriRouteImport } from './routes/pengaturan.kategori'
-import { Route as PengaturanDataRouteImport } from './routes/pengaturan.data'
-import { Route as PengaturanAplikasiRouteImport } from './routes/pengaturan.aplikasi'
-import { Route as PengaturanAboutRouteImport } from './routes/pengaturan.about'
-import { Route as PengaturanBudgetIndexRouteImport } from './routes/pengaturan.budget.index'
-import { Route as PengaturanBudgetIdRouteImport } from './routes/pengaturan.budget.$id'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedTransaksiRouteImport } from './routes/_authenticated/transaksi'
+import { Route as AuthenticatedPengaturanRouteImport } from './routes/_authenticated/pengaturan'
+import { Route as AuthenticatedLaporanRouteImport } from './routes/_authenticated/laporan'
+import { Route as AuthenticatedPengaturanIndexRouteImport } from './routes/_authenticated/pengaturan.index'
+import { Route as AuthenticatedPengaturanPicRouteImport } from './routes/_authenticated/pengaturan.pic'
+import { Route as AuthenticatedPengaturanKategoriRouteImport } from './routes/_authenticated/pengaturan.kategori'
+import { Route as AuthenticatedPengaturanDataRouteImport } from './routes/_authenticated/pengaturan.data'
+import { Route as AuthenticatedPengaturanAplikasiRouteImport } from './routes/_authenticated/pengaturan.aplikasi'
+import { Route as AuthenticatedPengaturanAboutRouteImport } from './routes/_authenticated/pengaturan.about'
+import { Route as AuthenticatedPengaturanBudgetIndexRouteImport } from './routes/_authenticated/pengaturan.budget.index'
+import { Route as AuthenticatedPengaturanBudgetIdRouteImport } from './routes/_authenticated/pengaturan.budget.$id'
 
-const TransaksiRoute = TransaksiRouteImport.update({
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedTransaksiRoute = AuthenticatedTransaksiRouteImport.update({
   id: '/transaksi',
   path: '/transaksi',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const PengaturanRoute = PengaturanRouteImport.update({
+const AuthenticatedPengaturanRoute = AuthenticatedPengaturanRouteImport.update({
   id: '/pengaturan',
   path: '/pengaturan',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const LaporanRoute = LaporanRouteImport.update({
+const AuthenticatedLaporanRoute = AuthenticatedLaporanRouteImport.update({
   id: '/laporan',
   path: '/laporan',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PengaturanIndexRoute = PengaturanIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => PengaturanRoute,
-} as any)
-const PengaturanPicRoute = PengaturanPicRouteImport.update({
-  id: '/pic',
-  path: '/pic',
-  getParentRoute: () => PengaturanRoute,
-} as any)
-const PengaturanKategoriRoute = PengaturanKategoriRouteImport.update({
-  id: '/kategori',
-  path: '/kategori',
-  getParentRoute: () => PengaturanRoute,
-} as any)
-const PengaturanDataRoute = PengaturanDataRouteImport.update({
-  id: '/data',
-  path: '/data',
-  getParentRoute: () => PengaturanRoute,
-} as any)
-const PengaturanAplikasiRoute = PengaturanAplikasiRouteImport.update({
-  id: '/aplikasi',
-  path: '/aplikasi',
-  getParentRoute: () => PengaturanRoute,
-} as any)
-const PengaturanAboutRoute = PengaturanAboutRouteImport.update({
-  id: '/about',
-  path: '/about',
-  getParentRoute: () => PengaturanRoute,
-} as any)
-const PengaturanBudgetIndexRoute = PengaturanBudgetIndexRouteImport.update({
-  id: '/budget/',
-  path: '/budget/',
-  getParentRoute: () => PengaturanRoute,
-} as any)
-const PengaturanBudgetIdRoute = PengaturanBudgetIdRouteImport.update({
-  id: '/budget/$id',
-  path: '/budget/$id',
-  getParentRoute: () => PengaturanRoute,
-} as any)
+const AuthenticatedPengaturanIndexRoute =
+  AuthenticatedPengaturanIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedPengaturanRoute,
+  } as any)
+const AuthenticatedPengaturanPicRoute =
+  AuthenticatedPengaturanPicRouteImport.update({
+    id: '/pic',
+    path: '/pic',
+    getParentRoute: () => AuthenticatedPengaturanRoute,
+  } as any)
+const AuthenticatedPengaturanKategoriRoute =
+  AuthenticatedPengaturanKategoriRouteImport.update({
+    id: '/kategori',
+    path: '/kategori',
+    getParentRoute: () => AuthenticatedPengaturanRoute,
+  } as any)
+const AuthenticatedPengaturanDataRoute =
+  AuthenticatedPengaturanDataRouteImport.update({
+    id: '/data',
+    path: '/data',
+    getParentRoute: () => AuthenticatedPengaturanRoute,
+  } as any)
+const AuthenticatedPengaturanAplikasiRoute =
+  AuthenticatedPengaturanAplikasiRouteImport.update({
+    id: '/aplikasi',
+    path: '/aplikasi',
+    getParentRoute: () => AuthenticatedPengaturanRoute,
+  } as any)
+const AuthenticatedPengaturanAboutRoute =
+  AuthenticatedPengaturanAboutRouteImport.update({
+    id: '/about',
+    path: '/about',
+    getParentRoute: () => AuthenticatedPengaturanRoute,
+  } as any)
+const AuthenticatedPengaturanBudgetIndexRoute =
+  AuthenticatedPengaturanBudgetIndexRouteImport.update({
+    id: '/budget/',
+    path: '/budget/',
+    getParentRoute: () => AuthenticatedPengaturanRoute,
+  } as any)
+const AuthenticatedPengaturanBudgetIdRoute =
+  AuthenticatedPengaturanBudgetIdRouteImport.update({
+    id: '/budget/$id',
+    path: '/budget/$id',
+    getParentRoute: () => AuthenticatedPengaturanRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/laporan': typeof LaporanRoute
-  '/pengaturan': typeof PengaturanRouteWithChildren
-  '/transaksi': typeof TransaksiRoute
-  '/pengaturan/about': typeof PengaturanAboutRoute
-  '/pengaturan/aplikasi': typeof PengaturanAplikasiRoute
-  '/pengaturan/data': typeof PengaturanDataRoute
-  '/pengaturan/kategori': typeof PengaturanKategoriRoute
-  '/pengaturan/pic': typeof PengaturanPicRoute
-  '/pengaturan/': typeof PengaturanIndexRoute
-  '/pengaturan/budget/$id': typeof PengaturanBudgetIdRoute
-  '/pengaturan/budget/': typeof PengaturanBudgetIndexRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/auth': typeof AuthRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/laporan': typeof AuthenticatedLaporanRoute
+  '/pengaturan': typeof AuthenticatedPengaturanRouteWithChildren
+  '/transaksi': typeof AuthenticatedTransaksiRoute
+  '/pengaturan/about': typeof AuthenticatedPengaturanAboutRoute
+  '/pengaturan/aplikasi': typeof AuthenticatedPengaturanAplikasiRoute
+  '/pengaturan/data': typeof AuthenticatedPengaturanDataRoute
+  '/pengaturan/kategori': typeof AuthenticatedPengaturanKategoriRoute
+  '/pengaturan/pic': typeof AuthenticatedPengaturanPicRoute
+  '/pengaturan/': typeof AuthenticatedPengaturanIndexRoute
+  '/pengaturan/budget/$id': typeof AuthenticatedPengaturanBudgetIdRoute
+  '/pengaturan/budget/': typeof AuthenticatedPengaturanBudgetIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/laporan': typeof LaporanRoute
-  '/transaksi': typeof TransaksiRoute
-  '/pengaturan/about': typeof PengaturanAboutRoute
-  '/pengaturan/aplikasi': typeof PengaturanAplikasiRoute
-  '/pengaturan/data': typeof PengaturanDataRoute
-  '/pengaturan/kategori': typeof PengaturanKategoriRoute
-  '/pengaturan/pic': typeof PengaturanPicRoute
-  '/pengaturan': typeof PengaturanIndexRoute
-  '/pengaturan/budget/$id': typeof PengaturanBudgetIdRoute
-  '/pengaturan/budget': typeof PengaturanBudgetIndexRoute
+  '/auth': typeof AuthRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/laporan': typeof AuthenticatedLaporanRoute
+  '/transaksi': typeof AuthenticatedTransaksiRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/pengaturan/about': typeof AuthenticatedPengaturanAboutRoute
+  '/pengaturan/aplikasi': typeof AuthenticatedPengaturanAplikasiRoute
+  '/pengaturan/data': typeof AuthenticatedPengaturanDataRoute
+  '/pengaturan/kategori': typeof AuthenticatedPengaturanKategoriRoute
+  '/pengaturan/pic': typeof AuthenticatedPengaturanPicRoute
+  '/pengaturan': typeof AuthenticatedPengaturanIndexRoute
+  '/pengaturan/budget/$id': typeof AuthenticatedPengaturanBudgetIdRoute
+  '/pengaturan/budget': typeof AuthenticatedPengaturanBudgetIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/laporan': typeof LaporanRoute
-  '/pengaturan': typeof PengaturanRouteWithChildren
-  '/transaksi': typeof TransaksiRoute
-  '/pengaturan/about': typeof PengaturanAboutRoute
-  '/pengaturan/aplikasi': typeof PengaturanAplikasiRoute
-  '/pengaturan/data': typeof PengaturanDataRoute
-  '/pengaturan/kategori': typeof PengaturanKategoriRoute
-  '/pengaturan/pic': typeof PengaturanPicRoute
-  '/pengaturan/': typeof PengaturanIndexRoute
-  '/pengaturan/budget/$id': typeof PengaturanBudgetIdRoute
-  '/pengaturan/budget/': typeof PengaturanBudgetIndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/_authenticated/laporan': typeof AuthenticatedLaporanRoute
+  '/_authenticated/pengaturan': typeof AuthenticatedPengaturanRouteWithChildren
+  '/_authenticated/transaksi': typeof AuthenticatedTransaksiRoute
+  '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/pengaturan/about': typeof AuthenticatedPengaturanAboutRoute
+  '/_authenticated/pengaturan/aplikasi': typeof AuthenticatedPengaturanAplikasiRoute
+  '/_authenticated/pengaturan/data': typeof AuthenticatedPengaturanDataRoute
+  '/_authenticated/pengaturan/kategori': typeof AuthenticatedPengaturanKategoriRoute
+  '/_authenticated/pengaturan/pic': typeof AuthenticatedPengaturanPicRoute
+  '/_authenticated/pengaturan/': typeof AuthenticatedPengaturanIndexRoute
+  '/_authenticated/pengaturan/budget/$id': typeof AuthenticatedPengaturanBudgetIdRoute
+  '/_authenticated/pengaturan/budget/': typeof AuthenticatedPengaturanBudgetIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
+    | '/reset-password'
     | '/laporan'
     | '/pengaturan'
     | '/transaksi'
@@ -142,9 +176,11 @@ export interface FileRouteTypes {
     | '/pengaturan/budget/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
+    | '/auth'
+    | '/reset-password'
     | '/laporan'
     | '/transaksi'
+    | '/'
     | '/pengaturan/about'
     | '/pengaturan/aplikasi'
     | '/pengaturan/data'
@@ -155,148 +191,200 @@ export interface FileRouteTypes {
     | '/pengaturan/budget'
   id:
     | '__root__'
-    | '/'
-    | '/laporan'
-    | '/pengaturan'
-    | '/transaksi'
-    | '/pengaturan/about'
-    | '/pengaturan/aplikasi'
-    | '/pengaturan/data'
-    | '/pengaturan/kategori'
-    | '/pengaturan/pic'
-    | '/pengaturan/'
-    | '/pengaturan/budget/$id'
-    | '/pengaturan/budget/'
+    | '/_authenticated'
+    | '/auth'
+    | '/reset-password'
+    | '/_authenticated/laporan'
+    | '/_authenticated/pengaturan'
+    | '/_authenticated/transaksi'
+    | '/_authenticated/'
+    | '/_authenticated/pengaturan/about'
+    | '/_authenticated/pengaturan/aplikasi'
+    | '/_authenticated/pengaturan/data'
+    | '/_authenticated/pengaturan/kategori'
+    | '/_authenticated/pengaturan/pic'
+    | '/_authenticated/pengaturan/'
+    | '/_authenticated/pengaturan/budget/$id'
+    | '/_authenticated/pengaturan/budget/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  LaporanRoute: typeof LaporanRoute
-  PengaturanRoute: typeof PengaturanRouteWithChildren
-  TransaksiRoute: typeof TransaksiRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/transaksi': {
-      id: '/transaksi'
-      path: '/transaksi'
-      fullPath: '/transaksi'
-      preLoaderRoute: typeof TransaksiRouteImport
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/pengaturan': {
-      id: '/pengaturan'
-      path: '/pengaturan'
-      fullPath: '/pengaturan'
-      preLoaderRoute: typeof PengaturanRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/laporan': {
-      id: '/laporan'
-      path: '/laporan'
-      fullPath: '/laporan'
-      preLoaderRoute: typeof LaporanRouteImport
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
+    '/_authenticated/': {
+      id: '/_authenticated/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/pengaturan/': {
-      id: '/pengaturan/'
+    '/_authenticated/transaksi': {
+      id: '/_authenticated/transaksi'
+      path: '/transaksi'
+      fullPath: '/transaksi'
+      preLoaderRoute: typeof AuthenticatedTransaksiRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/pengaturan': {
+      id: '/_authenticated/pengaturan'
+      path: '/pengaturan'
+      fullPath: '/pengaturan'
+      preLoaderRoute: typeof AuthenticatedPengaturanRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/laporan': {
+      id: '/_authenticated/laporan'
+      path: '/laporan'
+      fullPath: '/laporan'
+      preLoaderRoute: typeof AuthenticatedLaporanRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/pengaturan/': {
+      id: '/_authenticated/pengaturan/'
       path: '/'
       fullPath: '/pengaturan/'
-      preLoaderRoute: typeof PengaturanIndexRouteImport
-      parentRoute: typeof PengaturanRoute
+      preLoaderRoute: typeof AuthenticatedPengaturanIndexRouteImport
+      parentRoute: typeof AuthenticatedPengaturanRoute
     }
-    '/pengaturan/pic': {
-      id: '/pengaturan/pic'
+    '/_authenticated/pengaturan/pic': {
+      id: '/_authenticated/pengaturan/pic'
       path: '/pic'
       fullPath: '/pengaturan/pic'
-      preLoaderRoute: typeof PengaturanPicRouteImport
-      parentRoute: typeof PengaturanRoute
+      preLoaderRoute: typeof AuthenticatedPengaturanPicRouteImport
+      parentRoute: typeof AuthenticatedPengaturanRoute
     }
-    '/pengaturan/kategori': {
-      id: '/pengaturan/kategori'
+    '/_authenticated/pengaturan/kategori': {
+      id: '/_authenticated/pengaturan/kategori'
       path: '/kategori'
       fullPath: '/pengaturan/kategori'
-      preLoaderRoute: typeof PengaturanKategoriRouteImport
-      parentRoute: typeof PengaturanRoute
+      preLoaderRoute: typeof AuthenticatedPengaturanKategoriRouteImport
+      parentRoute: typeof AuthenticatedPengaturanRoute
     }
-    '/pengaturan/data': {
-      id: '/pengaturan/data'
+    '/_authenticated/pengaturan/data': {
+      id: '/_authenticated/pengaturan/data'
       path: '/data'
       fullPath: '/pengaturan/data'
-      preLoaderRoute: typeof PengaturanDataRouteImport
-      parentRoute: typeof PengaturanRoute
+      preLoaderRoute: typeof AuthenticatedPengaturanDataRouteImport
+      parentRoute: typeof AuthenticatedPengaturanRoute
     }
-    '/pengaturan/aplikasi': {
-      id: '/pengaturan/aplikasi'
+    '/_authenticated/pengaturan/aplikasi': {
+      id: '/_authenticated/pengaturan/aplikasi'
       path: '/aplikasi'
       fullPath: '/pengaturan/aplikasi'
-      preLoaderRoute: typeof PengaturanAplikasiRouteImport
-      parentRoute: typeof PengaturanRoute
+      preLoaderRoute: typeof AuthenticatedPengaturanAplikasiRouteImport
+      parentRoute: typeof AuthenticatedPengaturanRoute
     }
-    '/pengaturan/about': {
-      id: '/pengaturan/about'
+    '/_authenticated/pengaturan/about': {
+      id: '/_authenticated/pengaturan/about'
       path: '/about'
       fullPath: '/pengaturan/about'
-      preLoaderRoute: typeof PengaturanAboutRouteImport
-      parentRoute: typeof PengaturanRoute
+      preLoaderRoute: typeof AuthenticatedPengaturanAboutRouteImport
+      parentRoute: typeof AuthenticatedPengaturanRoute
     }
-    '/pengaturan/budget/': {
-      id: '/pengaturan/budget/'
+    '/_authenticated/pengaturan/budget/': {
+      id: '/_authenticated/pengaturan/budget/'
       path: '/budget'
       fullPath: '/pengaturan/budget/'
-      preLoaderRoute: typeof PengaturanBudgetIndexRouteImport
-      parentRoute: typeof PengaturanRoute
+      preLoaderRoute: typeof AuthenticatedPengaturanBudgetIndexRouteImport
+      parentRoute: typeof AuthenticatedPengaturanRoute
     }
-    '/pengaturan/budget/$id': {
-      id: '/pengaturan/budget/$id'
+    '/_authenticated/pengaturan/budget/$id': {
+      id: '/_authenticated/pengaturan/budget/$id'
       path: '/budget/$id'
       fullPath: '/pengaturan/budget/$id'
-      preLoaderRoute: typeof PengaturanBudgetIdRouteImport
-      parentRoute: typeof PengaturanRoute
+      preLoaderRoute: typeof AuthenticatedPengaturanBudgetIdRouteImport
+      parentRoute: typeof AuthenticatedPengaturanRoute
     }
   }
 }
 
-interface PengaturanRouteChildren {
-  PengaturanAboutRoute: typeof PengaturanAboutRoute
-  PengaturanAplikasiRoute: typeof PengaturanAplikasiRoute
-  PengaturanDataRoute: typeof PengaturanDataRoute
-  PengaturanKategoriRoute: typeof PengaturanKategoriRoute
-  PengaturanPicRoute: typeof PengaturanPicRoute
-  PengaturanIndexRoute: typeof PengaturanIndexRoute
-  PengaturanBudgetIdRoute: typeof PengaturanBudgetIdRoute
-  PengaturanBudgetIndexRoute: typeof PengaturanBudgetIndexRoute
+interface AuthenticatedPengaturanRouteChildren {
+  AuthenticatedPengaturanAboutRoute: typeof AuthenticatedPengaturanAboutRoute
+  AuthenticatedPengaturanAplikasiRoute: typeof AuthenticatedPengaturanAplikasiRoute
+  AuthenticatedPengaturanDataRoute: typeof AuthenticatedPengaturanDataRoute
+  AuthenticatedPengaturanKategoriRoute: typeof AuthenticatedPengaturanKategoriRoute
+  AuthenticatedPengaturanPicRoute: typeof AuthenticatedPengaturanPicRoute
+  AuthenticatedPengaturanIndexRoute: typeof AuthenticatedPengaturanIndexRoute
+  AuthenticatedPengaturanBudgetIdRoute: typeof AuthenticatedPengaturanBudgetIdRoute
+  AuthenticatedPengaturanBudgetIndexRoute: typeof AuthenticatedPengaturanBudgetIndexRoute
 }
 
-const PengaturanRouteChildren: PengaturanRouteChildren = {
-  PengaturanAboutRoute: PengaturanAboutRoute,
-  PengaturanAplikasiRoute: PengaturanAplikasiRoute,
-  PengaturanDataRoute: PengaturanDataRoute,
-  PengaturanKategoriRoute: PengaturanKategoriRoute,
-  PengaturanPicRoute: PengaturanPicRoute,
-  PengaturanIndexRoute: PengaturanIndexRoute,
-  PengaturanBudgetIdRoute: PengaturanBudgetIdRoute,
-  PengaturanBudgetIndexRoute: PengaturanBudgetIndexRoute,
+const AuthenticatedPengaturanRouteChildren: AuthenticatedPengaturanRouteChildren =
+  {
+    AuthenticatedPengaturanAboutRoute: AuthenticatedPengaturanAboutRoute,
+    AuthenticatedPengaturanAplikasiRoute: AuthenticatedPengaturanAplikasiRoute,
+    AuthenticatedPengaturanDataRoute: AuthenticatedPengaturanDataRoute,
+    AuthenticatedPengaturanKategoriRoute: AuthenticatedPengaturanKategoriRoute,
+    AuthenticatedPengaturanPicRoute: AuthenticatedPengaturanPicRoute,
+    AuthenticatedPengaturanIndexRoute: AuthenticatedPengaturanIndexRoute,
+    AuthenticatedPengaturanBudgetIdRoute: AuthenticatedPengaturanBudgetIdRoute,
+    AuthenticatedPengaturanBudgetIndexRoute:
+      AuthenticatedPengaturanBudgetIndexRoute,
+  }
+
+const AuthenticatedPengaturanRouteWithChildren =
+  AuthenticatedPengaturanRoute._addFileChildren(
+    AuthenticatedPengaturanRouteChildren,
+  )
+
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedLaporanRoute: typeof AuthenticatedLaporanRoute
+  AuthenticatedPengaturanRoute: typeof AuthenticatedPengaturanRouteWithChildren
+  AuthenticatedTransaksiRoute: typeof AuthenticatedTransaksiRoute
+  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
-const PengaturanRouteWithChildren = PengaturanRoute._addFileChildren(
-  PengaturanRouteChildren,
-)
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedLaporanRoute: AuthenticatedLaporanRoute,
+  AuthenticatedPengaturanRoute: AuthenticatedPengaturanRouteWithChildren,
+  AuthenticatedTransaksiRoute: AuthenticatedTransaksiRoute,
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  LaporanRoute: LaporanRoute,
-  PengaturanRoute: PengaturanRouteWithChildren,
-  TransaksiRoute: TransaksiRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

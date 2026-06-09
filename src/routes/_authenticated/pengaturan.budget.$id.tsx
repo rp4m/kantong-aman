@@ -18,13 +18,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   useBudgetPeriods, useBudgetItems, useCategories, usePICs,
   addBudgetItem, updateBudgetItem, deleteBudgetItem, getRealizationForItem,
-} from "@/lib/budget-store";
+} from "@/lib/cloud-store";
 import type { BudgetItem } from "@/lib/budget-types";
 import { formatRupiah, formatDateRange } from "@/lib/budget-format";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/pengaturan/budget/$id")({
+export const Route = createFileRoute("/_authenticated/pengaturan/budget/$id")({
   component: BudgetDetailPage,
 });
 

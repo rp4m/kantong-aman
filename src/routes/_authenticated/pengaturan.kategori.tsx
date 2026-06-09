@@ -14,11 +14,11 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useCategories, addCategory, updateCategory, deleteCategory } from "@/lib/budget-store";
+import { useCategories, addCategory, updateCategory, deleteCategory } from "@/lib/cloud-store";
 import type { Category } from "@/lib/budget-types";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/pengaturan/kategori")({
+export const Route = createFileRoute("/_authenticated/pengaturan/kategori")({
   component: KategoriPage,
 });
 

@@ -15,12 +15,12 @@ import {
 } from "@/components/ui/select";
 import {
   useTransactions, useCategories, usePICs, useBudgetPeriods, useBudgetItems,
-} from "@/lib/budget-store";
+} from "@/lib/cloud-store";
 import { formatRupiah, formatDate, formatDateRange, monthLabel, todayISO, toISODate } from "@/lib/budget-format";
 import { MONTH_NAMES, type Transaction } from "@/lib/budget-types";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/laporan")({
+export const Route = createFileRoute("/_authenticated/laporan")({
   head: () => ({
     meta: [
       { title: "Laporan – Kantong Aman" },

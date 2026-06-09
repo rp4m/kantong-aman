@@ -14,11 +14,11 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { usePICs, addPIC, updatePIC, deletePIC } from "@/lib/budget-store";
+import { usePICs, addPIC, updatePIC, deletePIC } from "@/lib/cloud-store";
 import type { PIC } from "@/lib/budget-types";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/pengaturan/pic")({
+export const Route = createFileRoute("/_authenticated/pengaturan/pic")({
   component: PICPage,
 });
 

@@ -2,9 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Moon, Sun, CircleDollarSign, Calendar } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { Switch } from "@/components/ui/switch";
-import { useTheme } from "@/lib/budget-store";
+import { useTheme } from "@/lib/cloud-store";
 
-export const Route = createFileRoute("/pengaturan/aplikasi")({
+export const Route = createFileRoute("/_authenticated/pengaturan/aplikasi")({
   component: AplikasiPage,
 });
 
