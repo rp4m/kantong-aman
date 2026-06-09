@@ -251,29 +251,65 @@ function HomePage() {
             <TabsTrigger value="today">Hari Ini</TabsTrigger>
             <TabsTrigger value="month">Bulan Ini</TabsTrigger>
             <TabsTrigger value="year">Tahun Ini</TabsTrigger>
-            <TabsTrigger value="custom" className="gap-1">
+            <TabsTrigger value="custom">
               Custom
-              {filterKey === "custom" && (
-                <Popover open={calOpen} onOpenChange={setCalOpen}>
-                  <PopoverTrigger asChild>
-                    <ChevronDown className="h-3 w-3" />
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="range"
-                      selected={{ from: customRange.from, to: customRange.to }}
-                      onSelect={(range) => {
-                        if (range?.from && range?.to) {
-                          setCustomRange({ from: range.from, to: range.to });
-                          setCalOpen(false);
-                        }
-                      }}
-                      numberOfMonths={2}
-                    />
-                  </PopoverContent>
-                </Popover>
-              )}
             </TabsTrigger>
+            
+            {filterKey === "custom" && (
+              <Popover open={calOpen} onOpenChange={setCalOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="ml-1 h-7 px-2"
+                  >
+                    <ChevronDown className="h-3 w-3" />
+                  </Button>
+                </PopoverTrigger>
+            
+                <PopoverContent className="w-80">
+                  <div className="space-y-4">
+                    <div>
+                      <Label>Tanggal Mulai</Label>
+                      <Input
+                        type="date"
+                        value={toISODate(tempRange.from)}
+                        onChange={(e) =>
+                          setTempRange((prev) => ({
+                            ...prev,
+                            from: new Date(e.target.value),
+                          }))
+                        }
+                      />
+                    </div>
+                
+                    <div>
+                      <Label>Tanggal Selesai</Label>
+                      <Input
+                        type="date"
+                        value={toISODate(tempRange.to)}
+                        onChange={(e) =>
+                          setTempRange((prev) => ({
+                            ...prev,
+                            to: new Date(e.target.value),
+                          }))
+                        }
+                      />
+                    </div>
+                
+                    <Button
+                      className="w-full"
+                      onClick={() => {
+                        setCustomRange(tempRange);
+                        setCalOpen(false);
+                      }}
+                    >
+                      Simpan
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
           </TabsList>
         </Tabs>
       </div>
