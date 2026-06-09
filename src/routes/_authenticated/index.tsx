@@ -277,7 +277,7 @@ function HomePage() {
                       <Label>Tanggal Mulai</Label>
                       <Input
                         type="date"
-                        value={toISODate(tempRange.from)}
+                        value={tempRange?.from ? toISODate(tempRange.from) : ""}
                         onChange={(e) =>
                           setTempRange((prev) => ({
                             ...prev,
@@ -291,7 +291,7 @@ function HomePage() {
                       <Label>Tanggal Selesai</Label>
                       <Input
                         type="date"
-                        value={toISODate(tempRange.to)}
+                        value={tempRange?.to ? toISODate(tempRange.to) : ""}
                         onChange={(e) =>
                           setTempRange((prev) => ({
                             ...prev,
