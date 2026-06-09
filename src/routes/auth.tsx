@@ -29,10 +29,12 @@ function AuthPage() {
     });
   }, [navigate]);
 
+  const redirectUri = import.meta.env.VITE_AUTH_REDIRECT_URI || window.location.origin;
+
   async function handleGoogle() {
     setGoogleLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+      const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: redirectUri });
       if (result.error) {
         toast.error(result.error.message ?? "Gagal masuk dengan Google");
         setGoogleLoading(false);
