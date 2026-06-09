@@ -14,16 +14,342 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      budget_collaborators: {
+        Row: {
+          accepted_at: string | null
+          budget_period_id: string
+          id: string
+          invited_at: string
+          invited_email: string
+          role: Database["public"]["Enums"]["collab_role"]
+          status: Database["public"]["Enums"]["collab_status"]
+          user_id: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          budget_period_id: string
+          id?: string
+          invited_at?: string
+          invited_email: string
+          role?: Database["public"]["Enums"]["collab_role"]
+          status?: Database["public"]["Enums"]["collab_status"]
+          user_id?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          budget_period_id?: string
+          id?: string
+          invited_at?: string
+          invited_email?: string
+          role?: Database["public"]["Enums"]["collab_role"]
+          status?: Database["public"]["Enums"]["collab_status"]
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_collaborators_budget_period_id_fkey"
+            columns: ["budget_period_id"]
+            isOneToOne: false
+            referencedRelation: "budget_periods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      budget_items: {
+        Row: {
+          amount: number
+          budget_period_id: string
+          category_id: string | null
+          created_at: string
+          id: string
+          notes: string
+          pic_id: string | null
+        }
+        Insert: {
+          amount?: number
+          budget_period_id: string
+          category_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string
+          pic_id?: string | null
+        }
+        Update: {
+          amount?: number
+          budget_period_id?: string
+          category_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string
+          pic_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_items_budget_period_id_fkey"
+            columns: ["budget_period_id"]
+            isOneToOne: false
+            referencedRelation: "budget_periods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_items_pic_id_fkey"
+            columns: ["pic_id"]
+            isOneToOne: false
+            referencedRelation: "pics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      budget_periods: {
+        Row: {
+          created_at: string
+          description: string
+          end_date: string
+          id: string
+          name: string
+          owner_user_id: string
+          start_date: string
+          status: Database["public"]["Enums"]["budget_status"]
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          end_date: string
+          id?: string
+          name: string
+          owner_user_id: string
+          start_date: string
+          status?: Database["public"]["Enums"]["budget_status"]
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          end_date?: string
+          id?: string
+          name?: string
+          owner_user_id?: string
+          start_date?: string
+          status?: Database["public"]["Enums"]["budget_status"]
+        }
+        Relationships: []
+      }
+      categories: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          is_active: boolean
+          name: string
+          owner_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          owner_user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          owner_user_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+          payload: Json
+          type: Database["public"]["Enums"]["notif_type"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message: string
+          payload?: Json
+          type: Database["public"]["Enums"]["notif_type"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          payload?: Json
+          type?: Database["public"]["Enums"]["notif_type"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      pics: {
+        Row: {
+          created_at: string
+          description: string
+          email: string
+          id: string
+          is_active: boolean
+          name: string
+          owner_user_id: string
+          phone: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          email?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          owner_user_id: string
+          phone?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          email?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          owner_user_id?: string
+          phone?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          phone: string | null
+          preferences: Json
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          preferences?: Json
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          preferences?: Json
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          amount: number
+          budget_item_id: string | null
+          budget_period_id: string | null
+          category: string
+          created_at: string
+          created_by: string
+          date: string
+          id: string
+          notes: string
+          type: Database["public"]["Enums"]["tx_type"]
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          amount: number
+          budget_item_id?: string | null
+          budget_period_id?: string | null
+          category: string
+          created_at?: string
+          created_by: string
+          date: string
+          id?: string
+          notes?: string
+          type: Database["public"]["Enums"]["tx_type"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          amount?: number
+          budget_item_id?: string | null
+          budget_period_id?: string | null
+          category?: string
+          created_at?: string
+          created_by?: string
+          date?: string
+          id?: string
+          notes?: string
+          type?: Database["public"]["Enums"]["tx_type"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_budget_item_id_fkey"
+            columns: ["budget_item_id"]
+            isOneToOne: false
+            referencedRelation: "budget_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_budget_period_id_fkey"
+            columns: ["budget_period_id"]
+            isOneToOne: false
+            referencedRelation: "budget_periods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_budget_access: {
+        Args: {
+          _budget_id: string
+          _min_role: Database["public"]["Enums"]["collab_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_budget_owner: {
+        Args: { _budget_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      budget_status: "draft" | "active" | "closed"
+      collab_role: "owner" | "collaborator" | "viewer"
+      collab_status: "pending" | "accepted" | "rejected"
+      notif_type:
+        | "invitation_received"
+        | "invitation_accepted"
+        | "transaction_added"
+        | "budget_updated"
+        | "collaborator_added"
+        | "collaborator_removed"
+      tx_type: "income" | "expense"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +476,19 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      budget_status: ["draft", "active", "closed"],
+      collab_role: ["owner", "collaborator", "viewer"],
+      collab_status: ["pending", "accepted", "rejected"],
+      notif_type: [
+        "invitation_received",
+        "invitation_accepted",
+        "transaction_added",
+        "budget_updated",
+        "collaborator_added",
+        "collaborator_removed",
+      ],
+      tx_type: ["income", "expense"],
+    },
   },
 } as const
