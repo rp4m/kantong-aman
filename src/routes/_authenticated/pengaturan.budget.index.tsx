@@ -152,10 +152,10 @@ function BudgetListPage() {
             <AlertDialogCancel>Batal</AlertDialogCancel>
             <AlertDialogAction
               className="bg-expense text-expense-foreground hover:bg-expense/90"
-              onClick={() => {
+              onClick={async () => {
                 if (deleteId) {
-                  deleteBudgetPeriod(deleteId);
-                  toast.success("Periode dihapus");
+                  try { await deleteBudgetPeriod(deleteId); toast.success("Periode dihapus"); }
+                  catch (e) { toast.error((e as Error).message); }
                   setDeleteId(null);
                 }
               }}
