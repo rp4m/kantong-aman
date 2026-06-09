@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.tg_collab_self_update_guard() FROM PUBLIC, anon, authenticated;
