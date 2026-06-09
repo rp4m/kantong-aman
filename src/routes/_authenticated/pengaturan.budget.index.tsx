@@ -176,7 +176,7 @@ function PeriodFormDialog({
   const [endDate, setEndDate] = useState("");
   const [status, setStatus] = useState<BudgetPeriodStatus>("active");
 
-  useMemo(() => {
+  useEffect(() => {
     if (open) {
       if (initial) {
         setName(initial.name); setDescription(initial.description);
