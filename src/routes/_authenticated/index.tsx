@@ -32,7 +32,7 @@ type FilterKey = "today" | "month" | "year" | "custom";
 function rangeFor(
   key: FilterKey,
   custom?: { from: Date; to: Date }
-): { start: Date; end: Date; label: string } {
+): { start: string; end: string; label: string } {
   const now = new Date();
 
   switch (key) {
