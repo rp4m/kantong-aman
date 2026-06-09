@@ -87,6 +87,10 @@ function HomePage() {
 
   const [openForm, setOpenForm] = useState(false);
   const [filterKey, setFilterKey] = useState<FilterKey>("month");
+  const [tempRange, setTempRange] = useState({
+    from: customRange.from,
+    to: customRange.to,
+  });
   const [customRange, setCustomRange] = useState<{ from: Date; to: Date }>({
     from: startOfMonth(new Date()),
     to: endOfMonth(new Date()),
