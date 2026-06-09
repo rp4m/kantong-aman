@@ -170,6 +170,9 @@ export function CloudDataProvider({ children }: { children: ReactNode }) {
       .on("postgres_changes", { event: "*", schema: "public", table: "budget_collaborators" }, async () => {
         if (currentUserId) await refreshSlice("collaborators");
       })
+      .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, async () => {
+        if (currentUserId) await refreshSlice("profiles");
+      })
       .subscribe();
 
     return () => { cancelled = true; supabase.removeChannel(channel); };
