@@ -29,24 +29,63 @@ export const Route = createFileRoute("/_authenticated/")({
 
 type FilterKey = "today" | "month" | "year" | "custom";
 
-function rangeFor(key: FilterKey, custom?: { from: Date; to: Date }) {
+function rangeFor(
+  key: FilterKey,
+  custom?: { from: Date; to: Date }
+): { start: string; end: string; label: string } {
   const now = new Date();
+
   switch (key) {
-    case "today":
-      return { start: todayISO(), end: todayISO() };
-    case "month":
+    case "today": {
+      const date = todayISO();
       return {
-        start: toISODate(startOfMonth(now)),
-        end: toISODate(endOfMonth(now)),
+        start: date,
+        end: date,
+        label: formatDate(date),
       };
-    case "year":
+    }
+
+    case "month": {
+      const start = toISODate(startOfMonth(now));
+      const end = toISODate(endOfMonth(now));
+
       return {
-        start: toISODate(startOfYear(now)),
-        end: toISODate(endOfYear(now)),
+        start,
+        end,
+        label: formatDateRange(start, end),
       };
+    }
+
+    case "year": {
+      const start = toISODate(startOfYear(now));
+      const end = toISODate(endOfYear(now));
+
+      return {
+        start,
+        end,
+        label: String(now.getFullYear()),
+      };
+    }
+
     case "custom": {
-      if (!custom) return { start: todayISO(), end: todayISO() };
-      return { start: toISODate(custom.from), end: toISODate(custom.to) };
+      if (!custom) {
+        const date = todayISO();
+
+        return {
+          start: date,
+          end: date,
+          label: formatDate(date),
+        };
+      }
+
+      const start = toISODate(custom.from);
+      const end = toISODate(custom.to);
+
+      return {
+        start,
+        end,
+        label: formatDateRange(start, end),
+      };
     }
   }
 }
@@ -210,7 +249,7 @@ function HomePage() {
   return (
     <AppShell
       title="Beranda"
-      subtitle={`${filteredPeriods.length} budget aktif`}
+      subtitle={`${range.label}` • ${filteredPeriods.length} budget aktif`}
       action={
         <Button size="sm" onClick={() => setOpenForm(true)} className="rounded-full">
           <Plus className="mr-1 h-4 w-4" /> Tambah
@@ -249,9 +288,6 @@ function HomePage() {
             </TabsTrigger>
           </TabsList>
         </Tabs>
-        <p className="text-xs text-muted-foreground">
-          {formatDate(range.start)} – {formatDate(range.end)}
-        </p>
       </div>
 
       {filteredPeriods.length === 0 ? (
