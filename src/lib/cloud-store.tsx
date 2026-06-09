@@ -89,16 +89,21 @@ const toCollab = (r: any): Collaborator => ({
   acceptedAt: r.accepted_at,
 });
 
+const toProfile = (r: any): UserProfile => ({
+  id: r.id, email: r.email ?? "", fullName: r.full_name ?? "", avatarUrl: r.avatar_url ?? null,
+});
+
 // =================== Fetch all ===================
 
 async function fetchAll(userId: string) {
-  const [tx, cat, pic, periods, items, collab] = await Promise.all([
+  const [tx, cat, pic, periods, items, collab, profs] = await Promise.all([
     supabase.from("transactions").select("*").order("date", { ascending: false }),
     supabase.from("categories").select("*").order("created_at", { ascending: false }),
     supabase.from("pics").select("*").order("created_at", { ascending: false }),
     supabase.from("budget_periods").select("*").order("created_at", { ascending: false }),
     supabase.from("budget_items").select("*").order("created_at", { ascending: false }),
     supabase.from("budget_collaborators").select("*"),
+    supabase.from("profiles").select("*"),
   ]);
   txCache = (tx.data ?? []).map(toTx);
   categoryCache = (cat.data ?? []).map(toCat);
@@ -106,6 +111,7 @@ async function fetchAll(userId: string) {
   periodCache = (periods.data ?? []).map(toPeriod);
   itemCache = (items.data ?? []).map(toItem);
   collaboratorCache = (collab.data ?? []).map(toCollab);
+  profileCache = (profs.data ?? []).map(toProfile);
 
   // Seed defaults if first time
   if (picCache.length === 0) {
