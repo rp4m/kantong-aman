@@ -73,7 +73,7 @@ function HomePage() {
     const { start, end } = range;
     return periods.filter((p) => {
       // overlap: p.startDate <= end AND p.endDate >= start
-      return p.startDate <= end && p.endDate >= start;
+      return p.status === "active" && p.startDate <= end && p.endDate >= start;
     }).sort((a, b) => a.startDate.localeCompare(b.startDate));
   }, [periods, range]);
 
@@ -322,6 +322,34 @@ function HomePage() {
               ))}
             </section>
           )}
+
+          {/* Active budgets */}
+          <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
+            <div className="mb-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CalendarIcon className="h-4 w-4 text-primary" />
+                <h2 className="text-sm font-semibold">Budget Aktif</h2>
+              </div>
+              <Link to="/pengaturan/budget" className="text-xs font-medium text-primary">Kelola →</Link>
+            </div>
+            {filteredPeriods.length === 0 ? (
+              <EmptyHint text="Belum ada budget aktif pada periode ini." />
+            ) : (
+              <ul className="space-y-2">
+                {filteredPeriods.map((p) => (
+                  <li key={p.id}>
+                    <Link to="/pengaturan/budget/$id" params={{ id: p.id }} className="flex items-center justify-between rounded-xl bg-muted/40 p-3 hover:bg-muted">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium">{p.name}</p>
+                        <p className="text-[11px] text-muted-foreground">{formatDateRange(p.startDate, p.endDate)}</p>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
 
           {/* Budget per Kategori */}
           <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
