@@ -184,7 +184,7 @@ export function CloudDataProvider({ children }: { children: ReactNode }) {
   return <Ctx.Provider value={me}>{children}</Ctx.Provider>;
 }
 
-async function refreshSlice(slice: "transactions" | "categories" | "pics" | "budget_periods" | "budget_items" | "collaborators") {
+async function refreshSlice(slice: "transactions" | "categories" | "pics" | "budget_periods" | "budget_items" | "collaborators" | "profiles") {
   if (slice === "transactions") {
     const { data } = await supabase.from("transactions").select("*").order("date", { ascending: false });
     txCache = (data ?? []).map(toTx);
@@ -203,6 +203,9 @@ async function refreshSlice(slice: "transactions" | "categories" | "pics" | "bud
   } else if (slice === "collaborators") {
     const { data } = await supabase.from("budget_collaborators").select("*");
     collaboratorCache = (data ?? []).map(toCollab);
+  } else if (slice === "profiles") {
+    const { data } = await supabase.from("profiles").select("*");
+    profileCache = (data ?? []).map(toProfile);
   }
   emit();
 }
