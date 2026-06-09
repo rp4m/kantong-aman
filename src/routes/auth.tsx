@@ -29,10 +29,12 @@ function AuthPage() {
     });
   }, [navigate]);
 
+  const redirectUri = import.meta.env.VITE_AUTH_REDIRECT_URI || window.location.origin;
+
   async function handleGoogle() {
     setGoogleLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
+      const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: redirectUri });
       if (result.error) {
         toast.error(result.error.message ?? "Gagal masuk dengan Google");
         setGoogleLoading(false);
@@ -59,7 +61,7 @@ function AuthPage() {
         const { error } = await supabase.auth.signUp({
           email, password,
           options: {
-            emailRedirectTo: `${window.location.origin}/`,
+            emailRedirectTo: `${redirectUri}/`,
             data: { full_name: fullName },
           },
         });
@@ -68,7 +70,7 @@ function AuthPage() {
         setMode("login");
       } else {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/reset-password`,
+          redirectTo: `${redirectUri}/reset-password`,
         });
         if (error) throw error;
         toast.success("Email reset password telah dikirim.");
