@@ -132,17 +132,17 @@ function AuthPage() {
               {mode === "register" && (
                 <div>
                   <Label htmlFor="name">Nama Lengkap</Label>
-                  <Input id="name" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+                  <Input id="name" value={fullName} required placeholder="Masukan nama lengkap" onChange={(e) => setFullName(e.target.value)} required />
                 </div>
               )}
               <div>
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                <Input id="email" type="email" required placeholder="contoh@gmail.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
               </div>
               {mode !== "forgot" && (
                 <div>
                   <Label htmlFor="password">Password</Label>
-                  <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+                  <Input id="password" type="password" placeholder="Minimal 6 karakter" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
                 </div>
               )}
               <Button type="submit" className="w-full h-11" disabled={loading}>

@@ -215,8 +215,8 @@ function HomePage() {
       .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.createdAt.localeCompare(a.createdAt)))
       .slice(0, 5);
 
-    const overBudgetCats = catRows.filter((r) => r.pct >= 100);
-    const nearLimitCats = catRows.filter((r) => r.pct >= 80 && r.pct < 100);
+    const overBudgetCats = catRows.filter((r) => r.pct > 100);
+    const nearLimitCats = catRows.filter((r) => r.pct >= 90 && r.pct < 100);
 
     return {
       totalBudget, totalReal, remaining, util,
