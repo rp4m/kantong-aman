@@ -322,7 +322,7 @@ function HomePage() {
               </div>
               <div className="rounded-xl bg-white/15 p-2.5 backdrop-blur">
                 <p className="opacity-80">Utilisasi</p>
-                <p className="mt-0.5 font-semibold">{data.totalBudget > 0 ? `${data.util.toFixed(0)}%` : "—"}</p>
+                <p className="mt-0.5 font-semibold">{data.totalBudget > 0 ? `${data.util.toFixed(1)}%` : "—"}</p>
               </div>
             </div>
           </div>
@@ -347,7 +347,7 @@ function HomePage() {
               {data.nearLimitCats.map((c) => (
                 <div key={c.id} className="flex items-start gap-2 rounded-xl bg-warning/20 p-2.5 text-xs text-warning-foreground">
                   <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-                  <span><b>{c.categoryName}</b> mendekati limit ({c.pct.toFixed(0)}%)</span>
+                  <span><b>{c.categoryName}</b> mendekati limit ({c.pct.toFixed(1)}%)</span>
                 </div>
               ))}
             </section>
@@ -404,7 +404,7 @@ function HomePage() {
                           itone === "expense" && "bg-expense-soft text-expense",
                           itone === "warning" && "bg-warning/30 text-warning-foreground",
                           itone === "primary" && "bg-primary/15 text-primary",
-                        )}>{r.pct.toFixed(0)}%</span>
+                        )}>{r.pct.toFixed(1)}%</span>
                       </div>
                       <div className="mt-1 flex justify-between text-[11px] text-muted-foreground">
                         <span>{formatRupiah(r.actual)} / {formatRupiah(r.budget)}</span>
