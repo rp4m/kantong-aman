@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { ArrowDownLeft, ArrowUpRight, Plus, PiggyBank, Wallet, TriangleAlert as AlertTriangle, Users, Calendar as CalendarIcon, ChevronRight, ChevronDown } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { AppShell } from "@/components/AppShell";
 import { StatCard } from "@/components/StatCard";
 import { TransactionFormDialog } from "@/components/TransactionFormDialog";
@@ -355,6 +356,14 @@ function HomePage() {
             </section>
           )}
 
+          {/* Trend Spending Chart */}
+          {data.recent.length > 0 && (
+            <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
+              <h2 className="mb-3 text-sm font-semibold">Trend Spending</h2>
+              <SpendingTrendChart transactions={filteredTransactions} />
+            </section>
+          )}
+
           {/* Active budgets */}
           <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
             <div className="mb-3 flex items-center justify-between">
@@ -528,6 +537,66 @@ function HomePage() {
 
       <TransactionFormDialog open={openForm} onOpenChange={setOpenForm} />
     </AppShell>
+  );
+}
+
+function SpendingTrendChart({ transactions }: { transactions: any[] }) {
+  const chartData = useMemo(() => {
+    const dataByDate = new Map<string, number>();
+    
+    transactions.forEach((t) => {
+      if (t.type === "expense") {
+        const dateStr = format(new Date(t.date), "dd MMM", { locale: idLocale });
+        dataByDate.set(dateStr, (dataByDate.get(dateStr) ?? 0) + t.amount);
+      }
+    });
+
+    return Array.from(dataByDate.entries())
+      .map(([date, amount]) => ({ date, amount }))
+      .sort((a, b) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return dateA.getTime() - dateB.getTime();
+      });
+  }, [transactions]);
+
+  if (chartData.length === 0) {
+    return <EmptyHint text="Belum ada data spending untuk periode ini." />;
+  }
+
+  return (
+    <ResponsiveContainer width="100%" height={250}>
+      <LineChart data={chartData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+        <XAxis 
+          dataKey="date" 
+          tick={{ fontSize: 12 }}
+          stroke="hsl(var(--muted-foreground))"
+        />
+        <YAxis 
+          tick={{ fontSize: 12 }}
+          stroke="hsl(var(--muted-foreground))"
+          tickFormatter={(value) => formatRupiahShort(value)}
+        />
+        <Tooltip 
+          contentStyle={{
+            backgroundColor: "hsl(var(--card))",
+            border: "1px solid hsl(var(--border))",
+            borderRadius: "8px",
+          }}
+          formatter={(value: number) => formatRupiah(value)}
+          labelStyle={{ color: "hsl(var(--foreground))" }}
+        />
+        <Line 
+          type="monotone" 
+          dataKey="amount" 
+          stroke="hsl(var(--expense))" 
+          dot={{ fill: "hsl(var(--expense))", r: 4 }}
+          activeDot={{ r: 6 }}
+          strokeWidth={2}
+        />
+      </LineChart>
+    </ResponsiveContainer>
   );
 }
 
