@@ -356,13 +356,6 @@ function HomePage() {
             </section>
           )}
 
-          {/* Trend Spending Chart */}
-          {data.recent.length > 0 && (
-            <section className="mt-4 overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-card via-card to-expense-soft/30 shadow-sm">
-              <SpendingTrendChart transactions={filteredTransactions} />
-            </section>
-          )}
-
           {/* Active budgets */}
           <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
             <div className="mb-3 flex items-center justify-between">
@@ -478,6 +471,13 @@ function HomePage() {
                   );
                 })}
               </ul>
+            </section>
+          )}
+
+          {/* Trend Spending Chart */}
+          {data.recent.length > 0 && (
+            <section className="mt-4 overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-card via-card to-expense-soft/30 shadow-sm">
+              <SpendingTrendChart transactions={filteredTransactions} />
             </section>
           )}
 
