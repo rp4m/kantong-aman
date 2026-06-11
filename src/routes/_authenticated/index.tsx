@@ -334,7 +334,7 @@ function HomePage() {
             <StatCard label="Total Budget" value={data.totalBudget} tone="neutral" icon={Wallet} />
             <StatCard label="Realisasi" value={data.totalReal} tone="expense" icon={ArrowUpRight} />
             <StatCard label="Sisa Budget" value={data.remaining} tone={data.remaining < 0 ? "expense" : "balance"} icon={PiggyBank} />
-            <UtilCard value={Math.round(data.util)} tone={tone} />
+            <UtilCard value={data.util} tone={tone} />
           </div>
 
           {/* Insights */}
@@ -533,6 +533,7 @@ function HomePage() {
 
 function UtilCard({ value, tone }: { value: number; tone: string }) {
   const itone = tone === "expense" ? "expense" : tone === "warning" ? "warning" : "primary";
+  const formattedValue = value % 1 === 0 ? value.toFixed(0) : value.toFixed(1);
   return (
     <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
       <div className="flex items-start justify-between gap-3">
@@ -544,7 +545,7 @@ function UtilCard({ value, tone }: { value: number; tone: string }) {
             itone === "warning" && "text-warning-foreground",
             itone === "primary" && "text-primary",
           )}>
-            {value}%
+            {formattedValue}%
           </p>
         </div>
         <div className={cn(
