@@ -9,6 +9,7 @@ export interface Transaction {
   notes: string;
   budgetItemId?: string; // optional link to a BudgetItem (for expense)
   createdAt: string;
+  createdBy?: string | null;
 }
 
 // ---- Legacy (kept for import) ----
