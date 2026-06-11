@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { ArrowDownLeft, ArrowUpRight, Plus, PiggyBank, Wallet, TriangleAlert as AlertTriangle, Users, Calendar as CalendarIcon, ChevronRight, ChevronDown } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, ReferenceDot } from "recharts";
 import { AppShell } from "@/components/AppShell";
 import { StatCard } from "@/components/StatCard";
 import { TransactionFormDialog } from "@/components/TransactionFormDialog";
