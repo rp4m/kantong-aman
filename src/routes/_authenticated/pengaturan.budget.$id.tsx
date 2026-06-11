@@ -92,46 +92,7 @@ function BudgetDetailPage() {
         <ArrowLeft className="h-3.5 w-3.5" /> Daftar Budget
       </Link>
 
-      <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_260px]">
-        <div>
-          <CollaboratorsSection budgetPeriodId={id} />
-        </div>
-
-        <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-          <div className="space-y-3">
-            <div className="space-y-1.5">
-              <Label className="text-xs">Filter PIC</Label>
-              <Select value={filterPic} onValueChange={setFilterPic}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Semua PIC</SelectItem>
-                  {pics.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            {filterPic !== "all" && selectedPic && (
-              <div className="rounded-2xl bg-primary/10 p-3 text-sm">
-                <p className="font-semibold">Ringkasan PIC</p>
-                <p className="text-xs text-muted-foreground">{selectedPic.name}</p>
-                <div className="mt-3 grid gap-2 text-xs">
-                  <div className="rounded-xl bg-white/15 p-2">
-                    <p className="opacity-80">Budget</p>
-                    <p className="mt-0.5 font-semibold">{formatRupiah(totalBudget)}</p>
-                  </div>
-                  <div className="rounded-xl bg-white/15 p-2">
-                    <p className="opacity-80">Realisasi</p>
-                    <p className="mt-0.5 font-semibold">{formatRupiah(totalReal)}</p>
-                  </div>
-                  <div className="rounded-xl bg-white/15 p-2">
-                    <p className="opacity-80">Sisa</p>
-                    <p className="mt-0.5 font-semibold">{formatRupiah(remaining)}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+      <CollaboratorsSection budgetPeriodId={id} />
 
       <section className="mt-4 rounded-2xl bg-gradient-to-br from-primary via-primary to-balance p-5 text-primary-foreground shadow-lg">
         <p className="text-xs uppercase tracking-wider opacity-80">Total Budget</p>
@@ -153,6 +114,41 @@ function BudgetDetailPage() {
       </section>
 
       <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            <Label className="text-xs">Filter PIC</Label>
+            <Select value={filterPic} onValueChange={setFilterPic}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Semua PIC</SelectItem>
+                {pics.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          {filterPic !== "all" && selectedPic && (
+            <div className="rounded-2xl bg-primary/10 p-4 text-sm">
+              <p className="font-semibold">Ringkasan PIC</p>
+              <p className="text-xs text-muted-foreground">{selectedPic.name}</p>
+              <div className="mt-3 grid gap-2 text-xs sm:grid-cols-3">
+                <div className="rounded-xl bg-white/15 p-2">
+                  <p className="opacity-80">Budget</p>
+                  <p className="mt-0.5 font-semibold">{formatRupiah(totalBudget)}</p>
+                </div>
+                <div className="rounded-xl bg-white/15 p-2">
+                  <p className="opacity-80">Realisasi</p>
+                  <p className="mt-0.5 font-semibold">{formatRupiah(totalReal)}</p>
+                </div>
+                <div className="rounded-xl bg-white/15 p-2">
+                  <p className="opacity-80">Sisa</p>
+                  <p className="mt-0.5 font-semibold">{formatRupiah(remaining)}</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
         <div className="mb-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             <h2 className="text-sm font-semibold">Daftar Budget Item</h2>
@@ -162,8 +158,6 @@ function BudgetDetailPage() {
           </div>
           <div className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-2 text-xs text-muted-foreground">
             <span>{filteredRows.length} item</span>
-            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-            <span>{formatRupiah(totalBudget)} budget</span>
           </div>
         </div>
         {filteredRows.length === 0 ? (
