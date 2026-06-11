@@ -316,11 +316,11 @@ function HomePage() {
             <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
               <div className="rounded-xl bg-white/15 p-2.5 backdrop-blur">
                 <p className="opacity-80">Realisasi</p>
-                <p className="mt-0.5 font-semibold">{formatRupiahShort(data.totalReal)}</p>
+                <p className="mt-0.5 font-semibold">{formatRupiah(data.totalReal)}</p>
               </div>
               <div className="rounded-xl bg-white/15 p-2.5 backdrop-blur">
                 <p className="opacity-80">Sisa</p>
-                <p className="mt-0.5 font-semibold">{formatRupiahShort(data.remaining)}</p>
+                <p className="mt-0.5 font-semibold">{formatRupiah(data.remaining)}</p>
               </div>
               <div className="rounded-xl bg-white/15 p-2.5 backdrop-blur">
                 <p className="opacity-80">Utilisasi</p>
@@ -329,13 +329,13 @@ function HomePage() {
             </div>
           </div>
 
-          {/* Stat grid */}
+          {/* Stat grid
           <div className="mt-4 grid grid-cols-2 gap-3">
             <StatCard label="Total Budget" value={data.totalBudget} tone="neutral" icon={Wallet} />
             <StatCard label="Realisasi" value={data.totalReal} tone="expense" icon={ArrowUpRight} />
             <StatCard label="Sisa Budget" value={data.remaining} tone={data.remaining < 0 ? "expense" : "balance"} icon={PiggyBank} />
             <UtilCard value={data.util} tone={tone} />
-          </div>
+          </div> */}
 
           {/* Insights */}
           {(data.overBudgetCats.length > 0 || data.nearLimitCats.length > 0) && (

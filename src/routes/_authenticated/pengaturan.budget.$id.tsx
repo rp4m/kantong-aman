@@ -108,7 +108,7 @@ function BudgetDetailPage() {
           </div>
           <div className="rounded-xl bg-white/15 p-2.5 backdrop-blur">
             <p className="opacity-80">Utilisasi</p>
-            <p className="mt-0.5 font-semibold">{util.toFixed(0)}%</p>
+            <p className="mt-0.5 font-semibold">{util % 1 === 0 ? util.toFixed(0) : util.toFixed(1)}%</p>
           </div>
         </div>
       </section>
