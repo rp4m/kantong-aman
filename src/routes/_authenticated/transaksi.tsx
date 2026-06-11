@@ -18,11 +18,13 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   useTransactions, deleteTransaction, useCategories, usePICs, useBudgetItems,
+  useProfiles, getProfileById,
 } from "@/lib/cloud-store";
 import { formatRupiah, formatDate } from "@/lib/budget-format";
 import { INCOME_CATEGORIES, type Transaction } from "@/lib/budget-types";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
+import { formatDistanceToNow, differenceInDays, format as formatDate2 } from "date-fns";
+import { id as idLocale } from "date-fns/locale";
 
 export const Route = createFileRoute("/_authenticated/transaksi")({
   head: () => ({
@@ -39,6 +41,7 @@ function TransaksiPage() {
   const categories = useCategories();
   const pics = usePICs();
   const items = useBudgetItems();
+  useProfiles();
 
   // tx.budgetItemId → picId
   const txToPicId = useMemo(() => {
@@ -189,36 +192,56 @@ function TransaksiPage() {
                   </div>
                 </div>
                 <ul className="divide-y divide-border">
-                  {items.map((t) => (
-                    <li key={t.id} className="flex items-center gap-3 px-4 py-3">
-                      <div className={cn(
-                        "flex h-10 w-10 items-center justify-center rounded-full",
-                        t.type === "income" ? "bg-income-soft text-income" : "bg-expense-soft text-expense",
-                      )}>
-                        {t.type === "income" ? <ArrowDownLeft className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium">{t.category}</p>
-                        {t.notes ? <p className="truncate text-xs text-muted-foreground">{t.notes}</p> : null}
-                      </div>
-                      <p className={cn(
-                        "text-sm font-semibold",
-                        t.type === "income" ? "text-income" : "text-expense",
-                      )}>
-                        {t.type === "income" ? "+" : "-"} {formatRupiah(t.amount)}
-                      </p>
-                      <div className="flex">
-                        <Button variant="ghost" size="icon" className="h-8 w-8"
-                          onClick={() => { setEditing(t); setOpenForm(true); }}>
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-expense"
-                          onClick={() => setDeleteId(t.id)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </li>
-                  ))}
+                  {items.map((t) => {
+                    const creator = getProfileById(t.createdBy);
+                    return (
+                      <li key={t.id} className="flex items-center gap-3 px-4 py-3">
+                        <div className={cn(
+                          "flex h-10 w-10 items-center justify-center rounded-full",
+                          t.type === "income" ? "bg-income-soft text-income" : "bg-expense-soft text-expense",
+                        )}>
+                          {t.type === "income" ? <ArrowDownLeft className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium">{t.category}</p>
+                          {t.notes ? <p className="mt-1 truncate text-xs text-muted-foreground">{t.notes}</p> : null}
+                          {creator && (
+                            <div className="mt-2 flex items-baseline gap-1">
+                              <span className="shrink-0 text-[10px] text-emerald-600">👤</span>
+                              <p className="truncate text-[10px] font-light text-emerald-600">
+                                {creator.fullName}
+                                <span className="mx-1">•</span>
+                                {differenceInDays(new Date(), new Date(t.createdAt)) > 0
+                                  ? formatDate2(new Date(t.createdAt), "dd MMM yyyy", {
+                                      locale: idLocale,
+                                    })
+                                  : formatDistanceToNow(new Date(t.createdAt), {
+                                      addSuffix: true,
+                                      locale: idLocale,
+                                    })}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                        <p className={cn(
+                          "text-sm font-semibold",
+                          t.type === "income" ? "text-income" : "text-expense",
+                        )}>
+                          {t.type === "income" ? "+" : "-"} {formatRupiah(t.amount)}
+                        </p>
+                        <div className="flex">
+                          <Button variant="ghost" size="icon" className="h-8 w-8"
+                            onClick={() => { setEditing(t); setOpenForm(true); }}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-expense"
+                            onClick={() => setDeleteId(t.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             );
