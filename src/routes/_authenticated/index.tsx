@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ArrowDownLeft, ArrowUpRight, Plus, PiggyBank, Wallet, TriangleAlert as AlertTriangle, Users, Calendar as CalendarIcon, ChevronRight, ChevronDown } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Plus, PiggyBank, Wallet, TriangleAlert as AlertTriangle, Users, Calendar as CalendarIcon, ChevronRight, ChevronDown, UserCircle } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { StatCard } from "@/components/StatCard";
 import { TransactionFormDialog } from "@/components/TransactionFormDialog";
@@ -16,7 +16,8 @@ import {
 } from "@/lib/cloud-store";
 import { formatRupiah, formatRupiahShort, formatDate, formatDateRange, todayISO, toISODate } from "@/lib/budget-format";
 import { cn } from "@/lib/utils";
-import { startOfMonth, endOfMonth, startOfYear, endOfYear, subDays, format } from "date-fns";
+import { startOfMonth, endOfMonth, startOfYear, endOfYear, subDays, format, formatDistanceToNow, differenceInDays } from "date-fns";
+import { id as idLocale } from "date-fns/locale";
 
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
@@ -493,15 +494,16 @@ function HomePage() {
                         {t.type === "income" ? <ArrowDownLeft className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="truncate text-sm font-medium">{t.category}</p>
-                          {creator ? (
-                            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
-                              Dibuat oleh {creator.fullName}
-                            </span>
-                          ) : null}
-                        </div>
-                        <p className="truncate text-xs text-muted-foreground">{t.notes || formatDate(t.date)}</p>
+                        <p className="truncate text-sm font-medium">{t.category}</p>
+                        {creator ? (
+                          <div className="mt-1 flex items-center gap-1.5">
+                            <UserCircle className="h-4 w-4 shrink-0 text-emerald-700" />
+                            <p className="truncate text-[10px] font-mono uppercase tracking-[0.16em] text-emerald-700">
+                              {creator.fullName} • {differenceInDays(new Date(), new Date(t.createdAt)) > 0 ? format(new Date(t.createdAt), "dd MMM yyyy", { locale: idLocale }) : formatDistanceToNow(new Date(t.createdAt), { addSuffix: true, locale: idLocale })}
+                            </p>
+                          </div>
+                        ) : null}
+                        <p className="mt-1 truncate text-xs text-muted-foreground">{t.notes || formatDate(t.date)}</p>
                       </div>
                       <p className={cn("text-sm font-semibold", t.type === "income" ? "text-income" : "text-expense")}>
                         {t.type === "income" ? "+" : "-"} {formatRupiah(t.amount)}
