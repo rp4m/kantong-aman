@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ArrowDownLeft, ArrowUpRight, Plus, PiggyBank, Wallet, TriangleAlert as AlertTriangle, Users, Calendar as CalendarIcon, ChevronRight, ChevronDown, UserCircle } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Plus, PiggyBank, Wallet, TriangleAlert as AlertTriangle, Users, Calendar as CalendarIcon, ChevronRight, ChevronDown, CircleUserRound } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { StatCard } from "@/components/StatCard";
 import { TransactionFormDialog } from "@/components/TransactionFormDialog";
@@ -495,14 +495,23 @@ function HomePage() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-medium">{t.category}</p>
-                        {creator ? (
-                          <div className="mt-1 flex items-center gap-1.5">
-                            <UserCircle className="h-4 w-4 shrink-0 text-emerald-700" />
-                            <p className="truncate text-[10px] font-mono uppercase tracking-[0.16em] text-emerald-700">
-                              {creator.fullName} • {differenceInDays(new Date(), new Date(t.createdAt)) > 0 ? format(new Date(t.createdAt), "dd MMM yyyy", { locale: idLocale }) : formatDistanceToNow(new Date(t.createdAt), { addSuffix: true, locale: idLocale })}
+                        {creator && (
+                          <div className="mt-2 flex items-center gap-1.5">
+                            <CircleUserRound className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                            <p className="truncate text-[11px] font-light text-emerald-600">
+                              {creator.fullName}
+                              <span className="mx-1">•</span>
+                              {differenceInDays(new Date(), new Date(t.createdAt)) > 0
+                                ? format(new Date(t.createdAt), "dd MMM yyyy", {
+                                    locale: idLocale,
+                                  })
+                                : formatDistanceToNow(new Date(t.createdAt), {
+                                    addSuffix: true,
+                                    locale: idLocale,
+                                  })}
                             </p>
                           </div>
-                        ) : null}
+                        )}
                         <p className="mt-1 truncate text-xs text-muted-foreground">{t.notes || formatDate(t.date)}</p>
                       </div>
                       <p className={cn("text-sm font-semibold", t.type === "income" ? "text-income" : "text-expense")}>

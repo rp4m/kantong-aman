@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import {
   Plus, Search, Filter, Pencil, Trash2,
-  ArrowDownLeft, ArrowUpRight, X, UserCircle,
+  ArrowDownLeft, ArrowUpRight, X, CircleUserRound,
 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { TransactionFormDialog } from "@/components/TransactionFormDialog";
@@ -204,14 +204,23 @@ function TransaksiPage() {
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-medium">{t.category}</p>
-                          {creator ? (
-                            <div className="mt-1 flex items-center gap-1.5">
-                              <UserCircle className="h-4 w-4 shrink-0 text-emerald-700" />
-                              <p className="truncate text-[10px] font-mono uppercase tracking-[0.16em] text-emerald-700">
-                                {creator.fullName} • {differenceInDays(new Date(), new Date(t.createdAt)) > 0 ? formatDate2(new Date(t.createdAt), "dd MMM yyyy", { locale: idLocale }) : formatDistanceToNow(new Date(t.createdAt), { addSuffix: true, locale: idLocale })}
+                          {creator && (
+                            <div className="mt-2 flex items-center gap-1.5">
+                              <CircleUserRound className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                              <p className="truncate text-[11px] font-light text-emerald-600">
+                                {creator.fullName}
+                                <span className="mx-1">•</span>
+                                {differenceInDays(new Date(), new Date(t.createdAt)) > 0
+                                  ? formatDate2(new Date(t.createdAt), "dd MMM yyyy", {
+                                      locale: idLocale,
+                                    })
+                                  : formatDistanceToNow(new Date(t.createdAt), {
+                                      addSuffix: true,
+                                      locale: idLocale,
+                                    })}
                               </p>
                             </div>
-                          ) : null}
+                          )}
                           {t.notes ? <p className="mt-1 truncate text-xs text-muted-foreground">{t.notes}</p> : null}
                         </div>
                         <p className={cn(
