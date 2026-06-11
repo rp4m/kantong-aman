@@ -49,10 +49,19 @@ function BudgetDetailPage() {
     });
   }, [periodItems, items]);
 
-  const totalBudget = rows.reduce((a, r) => a + r.item.amount, 0);
-  const totalReal = rows.reduce((a, r) => a + r.realized, 0);
+  const [filterPic, setFilterPic] = useState<string>("all");
+
+  const filteredRows = useMemo(() => {
+    if (filterPic === "all") return rows;
+    return rows.filter((r) => r.item.picId === filterPic);
+  }, [rows, filterPic]);
+
+  const totalBudget = filteredRows.reduce((a, r) => a + r.item.amount, 0);
+  const totalReal = filteredRows.reduce((a, r) => a + r.realized, 0);
   const remaining = totalBudget - totalReal;
   const util = totalBudget > 0 ? (totalReal / totalBudget) * 100 : 0;
+
+  const selectedPic = filterPic === "all" ? null : picById.get(filterPic);
 
   const [openForm, setOpenForm] = useState(false);
   const [editing, setEditing] = useState<BudgetItem | null>(null);
@@ -83,10 +92,48 @@ function BudgetDetailPage() {
         <ArrowLeft className="h-3.5 w-3.5" /> Daftar Budget
       </Link>
 
-      <CollaboratorsSection budgetPeriodId={id} />
+      <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_260px]">
+        <div>
+          <CollaboratorsSection budgetPeriodId={id} />
+        </div>
 
+        <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs">Filter PIC</Label>
+              <Select value={filterPic} onValueChange={setFilterPic}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua PIC</SelectItem>
+                  {pics.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            {filterPic !== "all" && selectedPic && (
+              <div className="rounded-2xl bg-primary/10 p-3 text-sm">
+                <p className="font-semibold">Ringkasan PIC</p>
+                <p className="text-xs text-muted-foreground">{selectedPic.name}</p>
+                <div className="mt-3 grid gap-2 text-xs">
+                  <div className="rounded-xl bg-white/15 p-2">
+                    <p className="opacity-80">Budget</p>
+                    <p className="mt-0.5 font-semibold">{formatRupiah(totalBudget)}</p>
+                  </div>
+                  <div className="rounded-xl bg-white/15 p-2">
+                    <p className="opacity-80">Realisasi</p>
+                    <p className="mt-0.5 font-semibold">{formatRupiah(totalReal)}</p>
+                  </div>
+                  <div className="rounded-xl bg-white/15 p-2">
+                    <p className="opacity-80">Sisa</p>
+                    <p className="mt-0.5 font-semibold">{formatRupiah(remaining)}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
 
-      <section className="rounded-2xl bg-gradient-to-br from-primary via-primary to-balance p-5 text-primary-foreground shadow-lg">
+      <section className="mt-4 rounded-2xl bg-gradient-to-br from-primary via-primary to-balance p-5 text-primary-foreground shadow-lg">
         <p className="text-xs uppercase tracking-wider opacity-80">Total Budget</p>
         <p className="mt-1 text-2xl font-bold">{formatRupiah(totalBudget)}</p>
         <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
@@ -106,14 +153,26 @@ function BudgetDetailPage() {
       </section>
 
       <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
-        <h2 className="mb-3 text-sm font-semibold">Daftar Budget Item</h2>
-        {rows.length === 0 ? (
+        <div className="mb-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 className="text-sm font-semibold">Daftar Budget Item</h2>
+            {filterPic !== "all" && selectedPic && (
+              <p className="mt-1 text-xs text-muted-foreground">Menampilkan item untuk PIC {selectedPic.name}.</p>
+            )}
+          </div>
+          <div className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-2 text-xs text-muted-foreground">
+            <span>{filteredRows.length} item</span>
+            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+            <span>{formatRupiah(totalBudget)} budget</span>
+          </div>
+        </div>
+        {filteredRows.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border bg-muted/40 p-6 text-center text-xs text-muted-foreground">
             Belum ada item. Tambahkan kategori + PIC.
           </div>
         ) : (
           <ul className="space-y-3">
-            {rows.map(({ item, realized, pct }) => {
+            {filteredRows.map(({ item, realized, pct }) => {
               const cat = catById.get(item.categoryId);
               const pic = picById.get(item.picId);
               const tone = pct >= 100 ? "expense" : pct >= 80 ? "warning" : "primary";
