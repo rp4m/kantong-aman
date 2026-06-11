@@ -358,8 +358,7 @@ function HomePage() {
 
           {/* Trend Spending Chart */}
           {data.recent.length > 0 && (
-            <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
-              <h2 className="mb-3 text-sm font-semibold">Trend Spending</h2>
+            <section className="mt-4 overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-card via-card to-expense-soft/30 shadow-sm">
               <SpendingTrendChart transactions={filteredTransactions} />
             </section>
           )}
