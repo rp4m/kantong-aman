@@ -1,21 +1,24 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { ArrowDownLeft, ArrowUpRight, Plus, PiggyBank, Wallet, TriangleAlert as AlertTriangle, Users, Calendar as CalendarIcon, ChevronRight, ChevronDown } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { AppShell } from "@/components/AppShell";
 import { StatCard } from "@/components/StatCard";
 import { TransactionFormDialog } from "@/components/TransactionFormDialog";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import {
   useTransactions, useCategories, usePICs, useBudgetPeriods, useBudgetItems,
-  useCurrentUser,
+  useCurrentUser, useProfiles, getProfileById,
 } from "@/lib/cloud-store";
 import { formatRupiah, formatRupiahShort, formatDate, formatDateRange, todayISO, toISODate } from "@/lib/budget-format";
 import { cn } from "@/lib/utils";
-import { startOfMonth, endOfMonth, startOfYear, endOfYear, subDays, format } from "date-fns";
+import { startOfMonth, endOfMonth, startOfYear, endOfYear, subDays, format, formatDistanceToNow, differenceInDays } from "date-fns";
+import { id as idLocale } from "date-fns/locale";
 
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
@@ -29,24 +32,51 @@ export const Route = createFileRoute("/_authenticated/")({
 
 type FilterKey = "today" | "month" | "year" | "custom";
 
-function rangeFor(key: FilterKey, custom?: { from: Date; to: Date }) {
+function rangeFor(
+  key: FilterKey,
+  custom?: { from: Date; to: Date }
+): { start: string; end: string; label: string } {
   const now = new Date();
+
   switch (key) {
-    case "today":
-      return { start: todayISO(), end: todayISO() };
-    case "month":
+    case "today": {
+      return {
+        start: todayISO(),
+        end: todayISO(),
+        label: formatDate(todayISO()),
+      };
+    }
+
+    case "month": {
       return {
         start: toISODate(startOfMonth(now)),
         end: toISODate(endOfMonth(now)),
+        label: formatDateRange(toISODate(startOfMonth(now)), toISODate(endOfMonth(now))),
       };
-    case "year":
+    }
+
+    case "year": {
       return {
         start: toISODate(startOfYear(now)),
         end: toISODate(endOfYear(now)),
+        label: String(now.getFullYear()),
       };
+    }
+
     case "custom": {
-      if (!custom) return { start: todayISO(), end: todayISO() };
-      return { start: toISODate(custom.from), end: toISODate(custom.to) };
+      if (!custom) {
+        return {
+          start: todayISO(),
+          end: todayISO(),
+          label: formatDate(todayISO()),
+        };
+      }
+      
+      return {
+        start: toISODate(custom.from),
+        end: toISODate(custom.to),
+        label: formatDateRange(toISODate(custom.from), toISODate(custom.to)),
+      };
     }
   }
 }
@@ -57,6 +87,7 @@ function HomePage() {
   const pics = usePICs();
   const periods = useBudgetPeriods();
   const items = useBudgetItems();
+  useProfiles();
 
   const [openForm, setOpenForm] = useState(false);
   const [filterKey, setFilterKey] = useState<FilterKey>("month");
@@ -73,7 +104,7 @@ function HomePage() {
     const { start, end } = range;
     return periods.filter((p) => {
       // overlap: p.startDate <= end AND p.endDate >= start
-      return p.startDate <= end && p.endDate >= start;
+      return p.status === "active" && p.startDate <= end && p.endDate >= start;
     }).sort((a, b) => a.startDate.localeCompare(b.startDate));
   }, [periods, range]);
 
@@ -92,7 +123,7 @@ function HomePage() {
 
     return transactions.filter((t) => {
       // Must be within the date range
-      if (t.date < start || t.date > end) return false;
+      // if (t.date < start || t.date > end) return false;
       // Must belong to one of the filtered budgets
       // Check via budgetItemId
       if (t.budgetItemId && filteredItemIds.has(t.budgetItemId)) return true;
@@ -182,12 +213,13 @@ function HomePage() {
     })).sort((a, b) => b.budget - a.budget);
 
     // Recent transactions
-    const recent = [...filteredTransactions]
+    const recent = [...transactions]
+      .filter((t) => (t as any).budgetPeriodId && filteredPeriodIds.has((t as any).budgetPeriodId))
       .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.createdAt.localeCompare(a.createdAt)))
       .slice(0, 5);
 
-    const overBudgetCats = catRows.filter((r) => r.pct >= 100);
-    const nearLimitCats = catRows.filter((r) => r.pct >= 80 && r.pct < 100);
+    const overBudgetCats = catRows.filter((r) => r.pct > 100);
+    const nearLimitCats = catRows.filter((r) => r.pct >= 90 && r.pct < 100);
 
     return {
       totalBudget, totalReal, remaining, util,
@@ -209,7 +241,7 @@ function HomePage() {
   return (
     <AppShell
       title="Beranda"
-      subtitle={`${filteredPeriods.length} budget aktif`}
+      subtitle={`${range.label} • ${filteredPeriods.length} budget aktif`}
       action={
         <Button size="sm" onClick={() => setOpenForm(true)} className="rounded-full">
           <Plus className="mr-1 h-4 w-4" /> Tambah
@@ -223,34 +255,36 @@ function HomePage() {
             <TabsTrigger value="today">Hari Ini</TabsTrigger>
             <TabsTrigger value="month">Bulan Ini</TabsTrigger>
             <TabsTrigger value="year">Tahun Ini</TabsTrigger>
-            <TabsTrigger value="custom" className="gap-1">
-              Custom
-              {filterKey === "custom" && (
-                <Popover open={calOpen} onOpenChange={setCalOpen}>
-                  <PopoverTrigger asChild>
-                    <ChevronDown className="h-3 w-3" />
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="range"
-                      selected={{ from: customRange.from, to: customRange.to }}
-                      onSelect={(range) => {
-                        if (range?.from && range?.to) {
-                          setCustomRange({ from: range.from, to: range.to });
-                          setCalOpen(false);
-                        }
-                      }}
-                      numberOfMonths={2}
-                    />
-                  </PopoverContent>
-                </Popover>
-              )}
-            </TabsTrigger>
+            <TabsTrigger value="custom">Custom</TabsTrigger>
           </TabsList>
         </Tabs>
-        <p className="text-xs text-muted-foreground">
-          {formatDate(range.start)} – {formatDate(range.end)}
-        </p>
+        {filterKey === "custom" && (
+          <div className="mt-2 flex justify-center gap-2">
+            <Input
+              type="date"
+              className="w-40"
+              value={range.start}
+              onChange={(e) =>
+                setCustomRange((prev) => ({
+                  ...prev,
+                  from: new Date(e.target.value),
+                }))
+              }
+            />
+        
+            <Input
+              type="date"
+              className="w-40"
+              value={range.end}
+              onChange={(e) =>
+                setCustomRange((prev) => ({
+                  ...prev,
+                  to: new Date(e.target.value),
+                }))
+              }
+            />
+          </div>
+        )}
       </div>
 
       {filteredPeriods.length === 0 ? (
@@ -283,26 +317,26 @@ function HomePage() {
             <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
               <div className="rounded-xl bg-white/15 p-2.5 backdrop-blur">
                 <p className="opacity-80">Realisasi</p>
-                <p className="mt-0.5 font-semibold">{formatRupiahShort(data.totalReal)}</p>
+                <p className="mt-0.5 font-semibold">{formatRupiah(data.totalReal)}</p>
               </div>
               <div className="rounded-xl bg-white/15 p-2.5 backdrop-blur">
                 <p className="opacity-80">Sisa</p>
-                <p className="mt-0.5 font-semibold">{formatRupiahShort(data.remaining)}</p>
+                <p className="mt-0.5 font-semibold">{formatRupiah(data.remaining)}</p>
               </div>
               <div className="rounded-xl bg-white/15 p-2.5 backdrop-blur">
                 <p className="opacity-80">Utilisasi</p>
-                <p className="mt-0.5 font-semibold">{data.totalBudget > 0 ? `${data.util.toFixed(0)}%` : "—"}</p>
+                <p className="mt-0.5 font-semibold">{data.totalBudget > 0 ? `${data.util % 1 === 0 ? data.util.toFixed(0) : data.util.toFixed(1)}%` : "—"}</p>
               </div>
             </div>
           </div>
 
-          {/* Stat grid */}
+          {/* Stat grid
           <div className="mt-4 grid grid-cols-2 gap-3">
             <StatCard label="Total Budget" value={data.totalBudget} tone="neutral" icon={Wallet} />
             <StatCard label="Realisasi" value={data.totalReal} tone="expense" icon={ArrowUpRight} />
             <StatCard label="Sisa Budget" value={data.remaining} tone={data.remaining < 0 ? "expense" : "balance"} icon={PiggyBank} />
-            <UtilCard value={Math.round(data.util)} tone={tone} />
-          </div>
+            <UtilCard value={data.util} tone={tone} />
+          </div> */}
 
           {/* Insights */}
           {(data.overBudgetCats.length > 0 || data.nearLimitCats.length > 0) && (
@@ -316,11 +350,47 @@ function HomePage() {
               {data.nearLimitCats.map((c) => (
                 <div key={c.id} className="flex items-start gap-2 rounded-xl bg-warning/20 p-2.5 text-xs text-warning-foreground">
                   <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-                  <span><b>{c.categoryName}</b> mendekati limit ({c.pct.toFixed(0)}%)</span>
+                  <span><b>{c.categoryName}</b> mendekati limit ({c.pct % 1 === 0 ? c.pct.toFixed(0) : c.pct.toFixed(1)}%)</span>
                 </div>
               ))}
             </section>
           )}
+
+          {/* Trend Spending Chart */}
+          {data.recent.length > 0 && (
+            <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
+              <h2 className="mb-3 text-sm font-semibold">Trend Spending</h2>
+              <SpendingTrendChart transactions={filteredTransactions} />
+            </section>
+          )}
+
+          {/* Active budgets */}
+          <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
+            <div className="mb-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CalendarIcon className="h-4 w-4 text-primary" />
+                <h2 className="text-sm font-semibold">Budget Aktif</h2>
+              </div>
+              <Link to="/pengaturan/budget" className="text-xs font-medium text-primary">Kelola →</Link>
+            </div>
+            {filteredPeriods.length === 0 ? (
+              <EmptyHint text="Belum ada budget aktif pada periode ini." />
+            ) : (
+              <ul className="space-y-2">
+                {filteredPeriods.map((p) => (
+                  <li key={p.id}>
+                    <Link to="/pengaturan/budget/$id" params={{ id: p.id }} className="flex items-center justify-between rounded-xl bg-muted/40 p-3 hover:bg-muted">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium">{p.name}</p>
+                        <p className="text-[11px] text-muted-foreground">{formatDateRange(p.startDate, p.endDate)}</p>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
 
           {/* Budget per Kategori */}
           <section className="mt-4 rounded-2xl border border-border bg-card p-4 shadow-sm">
@@ -345,7 +415,7 @@ function HomePage() {
                           itone === "expense" && "bg-expense-soft text-expense",
                           itone === "warning" && "bg-warning/30 text-warning-foreground",
                           itone === "primary" && "bg-primary/15 text-primary",
-                        )}>{r.pct.toFixed(0)}%</span>
+                        )}>{r.pct % 1 === 0 ? r.pct.toFixed(0) : r.pct.toFixed(1)}%</span>
                       </div>
                       <div className="mt-1 flex justify-between text-[11px] text-muted-foreground">
                         <span>{formatRupiah(r.actual)} / {formatRupiah(r.budget)}</span>
@@ -422,23 +492,43 @@ function HomePage() {
               <EmptyHint text="Belum ada transaksi pada budget ini." />
             ) : (
               <ul className="divide-y divide-border">
-                {data.recent.map((t) => (
-                  <li key={t.id} className="flex items-center gap-3 py-2.5">
-                    <div className={cn(
-                      "flex h-9 w-9 items-center justify-center rounded-full",
-                      t.type === "income" ? "bg-income-soft text-income" : "bg-expense-soft text-expense",
-                    )}>
-                      {t.type === "income" ? <ArrowDownLeft className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">{t.category}</p>
-                      <p className="truncate text-xs text-muted-foreground">{t.notes || formatDate(t.date)}</p>
-                    </div>
-                    <p className={cn("text-sm font-semibold", t.type === "income" ? "text-income" : "text-expense")}>
-                      {t.type === "income" ? "+" : "-"} {formatRupiah(t.amount)}
-                    </p>
-                  </li>
-                ))}
+                {data.recent.map((t) => {
+                  const creator = getProfileById(t.createdBy);
+                  return (
+                    <li key={t.id} className="flex items-center gap-3 py-2.5">
+                      <div className={cn(
+                        "flex h-9 w-9 items-center justify-center rounded-full",
+                        t.type === "income" ? "bg-income-soft text-income" : "bg-expense-soft text-expense",
+                      )}>
+                        {t.type === "income" ? <ArrowDownLeft className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium">{t.category}</p>
+                        <p className="mt-1 truncate text-xs text-muted-foreground">{t.notes || formatDate(t.date)}</p>
+                        {creator && (
+                          <div className="mt-2 flex items-baseline gap-1">
+                            <span className="shrink-0 text-[10px] text-emerald-600">👤</span>
+                            <p className="truncate text-[10px] font-light text-emerald-600">
+                              {creator.fullName}
+                              <span className="mx-1">•</span>
+                              {differenceInDays(new Date(), new Date(t.createdAt)) > 0
+                                ? format(new Date(t.createdAt), "dd MMM yyyy", {
+                                    locale: idLocale,
+                                  })
+                                : formatDistanceToNow(new Date(t.createdAt), {
+                                    addSuffix: true,
+                                    locale: idLocale,
+                                  })}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                      <p className={cn("text-sm font-semibold", t.type === "income" ? "text-income" : "text-expense")}>
+                        {t.type === "income" ? "+" : "-"} {formatRupiah(t.amount)}
+                      </p>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </section>
@@ -450,8 +540,69 @@ function HomePage() {
   );
 }
 
+function SpendingTrendChart({ transactions }: { transactions: any[] }) {
+  const chartData = useMemo(() => {
+    const dataByDate = new Map<string, number>();
+    
+    transactions.forEach((t) => {
+      if (t.type === "expense") {
+        const dateStr = format(new Date(t.date), "dd MMM", { locale: idLocale });
+        dataByDate.set(dateStr, (dataByDate.get(dateStr) ?? 0) + t.amount);
+      }
+    });
+
+    return Array.from(dataByDate.entries())
+      .map(([date, amount]) => ({ date, amount }))
+      .sort((a, b) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return dateA.getTime() - dateB.getTime();
+      });
+  }, [transactions]);
+
+  if (chartData.length === 0) {
+    return <EmptyHint text="Belum ada data spending untuk periode ini." />;
+  }
+
+  return (
+    <ResponsiveContainer width="100%" height={250}>
+      <LineChart data={chartData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+        <CartesianGrid strokeDasharray="0" stroke="hsl(var(--border))" vertical={true} />
+        <XAxis 
+          dataKey="date" 
+          tick={{ fontSize: 12 }}
+          stroke="hsl(var(--muted-foreground))"
+        />
+        <YAxis 
+          tick={{ fontSize: 12 }}
+          stroke="hsl(var(--muted-foreground))"
+          tickFormatter={(value) => formatRupiahShort(value)}
+        />
+        <Tooltip 
+          contentStyle={{
+            backgroundColor: "hsl(var(--card))",
+            border: "1px solid hsl(var(--border))",
+            borderRadius: "8px",
+          }}
+          formatter={(value: number) => formatRupiah(value)}
+          labelStyle={{ color: "hsl(var(--foreground))" }}
+        />
+        <Line 
+          type="monotone" 
+          dataKey="amount" 
+          stroke="hsl(var(--expense))" 
+          dot={{ fill: "hsl(var(--expense))", r: 4 }}
+          activeDot={{ r: 6 }}
+          strokeWidth={2}
+        />
+      </LineChart>
+    </ResponsiveContainer>
+  );
+}
+
 function UtilCard({ value, tone }: { value: number; tone: string }) {
   const itone = tone === "expense" ? "expense" : tone === "warning" ? "warning" : "primary";
+  const formattedValue = value % 1 === 0 ? value.toFixed(0) : value.toFixed(1);
   return (
     <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
       <div className="flex items-start justify-between gap-3">
@@ -463,7 +614,7 @@ function UtilCard({ value, tone }: { value: number; tone: string }) {
             itone === "warning" && "text-warning-foreground",
             itone === "primary" && "text-primary",
           )}>
-            {value}%
+            {formattedValue}%
           </p>
         </div>
         <div className={cn(
