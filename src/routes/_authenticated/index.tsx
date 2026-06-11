@@ -540,62 +540,136 @@ function HomePage() {
 }
 
 function SpendingTrendChart({ transactions }: { transactions: any[] }) {
-  const chartData = useMemo(() => {
-    const dataByDate = new Map<string, number>();
-    
+  const { chartData, total, avg, peak } = useMemo(() => {
+    const dataByDate = new Map<string, { amount: number; ts: number }>();
+
     transactions.forEach((t) => {
       if (t.type === "expense") {
-        const dateStr = format(new Date(t.date), "dd MMM", { locale: idLocale });
-        dataByDate.set(dateStr, (dataByDate.get(dateStr) ?? 0) + t.amount);
+        const d = new Date(t.date);
+        const key = format(d, "dd MMM", { locale: idLocale });
+        const prev = dataByDate.get(key);
+        dataByDate.set(key, { amount: (prev?.amount ?? 0) + t.amount, ts: d.getTime() });
       }
     });
 
-    return Array.from(dataByDate.entries())
-      .map(([date, amount]) => ({ date, amount }))
-      .sort((a, b) => {
-        const dateA = new Date(a.date);
-        const dateB = new Date(b.date);
-        return dateA.getTime() - dateB.getTime();
-      });
+    const arr = Array.from(dataByDate.entries())
+      .map(([date, v]) => ({ date, amount: v.amount, ts: v.ts }))
+      .sort((a, b) => a.ts - b.ts);
+
+    const total = arr.reduce((s, d) => s + d.amount, 0);
+    const avg = arr.length ? total / arr.length : 0;
+    const peak = arr.reduce<{ date: string; amount: number } | null>(
+      (m, d) => (!m || d.amount > m.amount ? { date: d.date, amount: d.amount } : m),
+      null,
+    );
+
+    return { chartData: arr, total, avg, peak };
   }, [transactions]);
 
   if (chartData.length === 0) {
-    return <EmptyHint text="Belum ada data spending untuk periode ini." />;
+    return (
+      <div className="p-4">
+        <h2 className="mb-3 text-sm font-semibold">Trend Spending</h2>
+        <EmptyHint text="Belum ada data spending untuk periode ini." />
+      </div>
+    );
   }
 
   return (
-    <ResponsiveContainer width="100%" height={250}>
-      <LineChart data={chartData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
-        <CartesianGrid strokeDasharray="0" stroke="hsl(var(--border))" vertical={true} />
-        <XAxis 
-          dataKey="date" 
-          tick={{ fontSize: 12 }}
-          stroke="hsl(var(--muted-foreground))"
-        />
-        <YAxis 
-          tick={{ fontSize: 12 }}
-          stroke="hsl(var(--muted-foreground))"
-          tickFormatter={(value) => formatRupiahShort(value)}
-        />
-        <Tooltip 
-          contentStyle={{
-            backgroundColor: "hsl(var(--card))",
-            border: "1px solid hsl(var(--border))",
-            borderRadius: "8px",
-          }}
-          formatter={(value: number) => formatRupiah(value)}
-          labelStyle={{ color: "hsl(var(--foreground))" }}
-        />
-        <Line 
-          type="monotone" 
-          dataKey="amount" 
-          stroke="hsl(var(--expense))" 
-          dot={{ fill: "hsl(var(--expense))", r: 4 }}
-          activeDot={{ r: 6 }}
-          strokeWidth={2}
-        />
-      </LineChart>
-    </ResponsiveContainer>
+    <div>
+      {/* Header */}
+      <div className="flex items-end justify-between gap-3 p-4 pb-2">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            Trend Spending
+          </p>
+          <p className="mt-1 text-2xl font-bold tracking-tight text-foreground tabular-nums">
+            {formatRupiah(total)}
+          </p>
+          <p className="mt-0.5 text-[11px] text-muted-foreground">
+            Rata-rata <span className="font-semibold text-foreground">{formatRupiahShort(avg)}</span> per hari
+          </p>
+        </div>
+        {peak && (
+          <div className="rounded-xl border border-expense/20 bg-expense-soft/60 px-3 py-2 text-right">
+            <p className="text-[9px] font-semibold uppercase tracking-wider text-expense">Puncak</p>
+            <p className="mt-0.5 text-sm font-bold text-expense tabular-nums">{formatRupiahShort(peak.amount)}</p>
+            <p className="text-[10px] text-muted-foreground">{peak.date}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Chart */}
+      <ResponsiveContainer width="100%" height={220}>
+        <AreaChart data={chartData} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
+          <defs>
+            <linearGradient id="spendingFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="hsl(var(--expense))" stopOpacity={0.35} />
+              <stop offset="100%" stopColor="hsl(var(--expense))" stopOpacity={0} />
+            </linearGradient>
+            <linearGradient id="spendingStroke" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="hsl(var(--expense))" stopOpacity={1} />
+              <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={1} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 6" stroke="hsl(var(--border))" vertical={false} opacity={0.5} />
+          <XAxis
+            dataKey="date"
+            tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+            stroke="transparent"
+            tickLine={false}
+            axisLine={false}
+            interval="preserveStartEnd"
+            minTickGap={20}
+          />
+          <YAxis
+            tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+            stroke="transparent"
+            tickLine={false}
+            axisLine={false}
+            tickFormatter={(value) => formatRupiahShort(value)}
+            width={48}
+          />
+          <Tooltip
+            cursor={{ stroke: "hsl(var(--expense))", strokeWidth: 1, strokeDasharray: "3 3", opacity: 0.5 }}
+            contentStyle={{
+              backgroundColor: "hsl(var(--card))",
+              border: "1px solid hsl(var(--border))",
+              borderRadius: "12px",
+              boxShadow: "0 8px 24px -8px rgba(0,0,0,0.15)",
+              padding: "8px 12px",
+            }}
+            labelStyle={{ color: "hsl(var(--muted-foreground))", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}
+            itemStyle={{ color: "hsl(var(--expense))", fontWeight: 700, fontSize: 13 }}
+            formatter={(value: number) => [formatRupiah(value), "Spending"]}
+          />
+          <Area
+            type="monotone"
+            dataKey="amount"
+            stroke="url(#spendingStroke)"
+            strokeWidth={2.5}
+            fill="url(#spendingFill)"
+            dot={false}
+            activeDot={{
+              r: 5,
+              fill: "hsl(var(--card))",
+              stroke: "hsl(var(--expense))",
+              strokeWidth: 2.5,
+            }}
+          />
+          {peak && (
+            <ReferenceDot
+              x={peak.date}
+              y={peak.amount}
+              r={4}
+              fill="hsl(var(--expense))"
+              stroke="hsl(var(--card))"
+              strokeWidth={2}
+            />
+          )}
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
   );
 }
 
