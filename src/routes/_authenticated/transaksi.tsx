@@ -206,8 +206,8 @@ function TransaksiPage() {
                           <p className="truncate text-sm font-medium">{t.category}</p>
                           {t.notes ? <p className="mt-1 truncate text-xs text-muted-foreground">{t.notes}</p> : null}
                           {creator && (
-                            <div className="mt-2 flex items-center gap-1.5">
-                              <span className="text-emerald-600">👤</span>
+                            <div className="mt-2 flex items-baseline gap-1">
+                              <span className="shrink-0 text-[10px] text-emerald-600">👤</span>
                               <p className="truncate text-[10px] font-light text-emerald-600">
                                 {creator.fullName}
                                 <span className="mx-1">•</span>
