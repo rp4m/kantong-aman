@@ -202,11 +202,15 @@ function TransaksiPage() {
                           {t.type === "income" ? <ArrowDownLeft className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium">{t.category}</p>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="truncate text-sm font-medium">{t.category}</p>
+                            {creator ? (
+                              <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                                Dibuat oleh {creator.fullName}
+                              </span>
+                            ) : null}
+                          </div>
                           {t.notes ? <p className="truncate text-xs text-muted-foreground">{t.notes}</p> : null}
-                          {creator ? (
-                            <p className="truncate text-xs text-muted-foreground">Dibuat oleh {creator.fullName}</p>
-                          ) : null}
                         </div>
                         <p className={cn(
                           "text-sm font-semibold",

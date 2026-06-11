@@ -12,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import {
   useTransactions, useCategories, usePICs, useBudgetPeriods, useBudgetItems,
-  useCurrentUser,
+  useCurrentUser, useProfiles, getProfileById,
 } from "@/lib/cloud-store";
 import { formatRupiah, formatRupiahShort, formatDate, formatDateRange, todayISO, toISODate } from "@/lib/budget-format";
 import { cn } from "@/lib/utils";
@@ -85,6 +85,7 @@ function HomePage() {
   const pics = usePICs();
   const periods = useBudgetPeriods();
   const items = useBudgetItems();
+  useProfiles();
 
   const [openForm, setOpenForm] = useState(false);
   const [filterKey, setFilterKey] = useState<FilterKey>("month");
@@ -481,23 +482,33 @@ function HomePage() {
               <EmptyHint text="Belum ada transaksi pada budget ini." />
             ) : (
               <ul className="divide-y divide-border">
-                {data.recent.map((t) => (
-                  <li key={t.id} className="flex items-center gap-3 py-2.5">
-                    <div className={cn(
-                      "flex h-9 w-9 items-center justify-center rounded-full",
-                      t.type === "income" ? "bg-income-soft text-income" : "bg-expense-soft text-expense",
-                    )}>
-                      {t.type === "income" ? <ArrowDownLeft className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">{t.category}</p>
-                      <p className="truncate text-xs text-muted-foreground">{t.notes || formatDate(t.date)}</p>
-                    </div>
-                    <p className={cn("text-sm font-semibold", t.type === "income" ? "text-income" : "text-expense")}>
-                      {t.type === "income" ? "+" : "-"} {formatRupiah(t.amount)}
-                    </p>
-                  </li>
-                ))}
+                {data.recent.map((t) => {
+                  const creator = getProfileById(t.createdBy);
+                  return (
+                    <li key={t.id} className="flex items-center gap-3 py-2.5">
+                      <div className={cn(
+                        "flex h-9 w-9 items-center justify-center rounded-full",
+                        t.type === "income" ? "bg-income-soft text-income" : "bg-expense-soft text-expense",
+                      )}>
+                        {t.type === "income" ? <ArrowDownLeft className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="truncate text-sm font-medium">{t.category}</p>
+                          {creator ? (
+                            <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                              Dibuat oleh {creator.fullName}
+                            </span>
+                          ) : null}
+                        </div>
+                        <p className="truncate text-xs text-muted-foreground">{t.notes || formatDate(t.date)}</p>
+                      </div>
+                      <p className={cn("text-sm font-semibold", t.type === "income" ? "text-income" : "text-expense")}>
+                        {t.type === "income" ? "+" : "-"} {formatRupiah(t.amount)}
+                      </p>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </section>
