@@ -197,7 +197,7 @@ function TransaksiPage() {
                     return (
                       <li key={t.id} className="flex items-center gap-3 px-4 py-3">
                         <div className={cn(
-                          "flex h-10 w-10 items-center justify-center rounded-full",
+                          "flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
                           t.type === "income" ? "bg-income-soft text-income" : "bg-expense-soft text-expense",
                         )}>
                           {t.type === "income" ? <ArrowDownLeft className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
@@ -212,24 +212,19 @@ function TransaksiPage() {
                                 {creator.fullName}
                                 <span className="mx-1">•</span>
                                 {differenceInDays(new Date(), new Date(t.createdAt)) > 0
-                                  ? formatDate2(new Date(t.createdAt), "dd MMM yyyy", {
-                                      locale: idLocale,
-                                    })
-                                  : formatDistanceToNow(new Date(t.createdAt), {
-                                      addSuffix: true,
-                                      locale: idLocale,
-                                    })}
+                                  ? formatDate2(new Date(t.createdAt), "dd MMM yyyy", { locale: idLocale })
+                                  : formatDistanceToNow(new Date(t.createdAt), { addSuffix: true, locale: idLocale })}
                               </p>
                             </div>
                           )}
                         </div>
                         <p className={cn(
-                          "text-sm font-semibold",
+                          "shrink-0 text-sm font-semibold",
                           t.type === "income" ? "text-income" : "text-expense",
                         )}>
                           {t.type === "income" ? "+" : "-"} {formatRupiah(t.amount)}
                         </p>
-                        <div className="flex">
+                        <div className="flex shrink-0">
                           <Button variant="ghost" size="icon" className="h-8 w-8"
                             onClick={() => { setEditing(t); setOpenForm(true); }}>
                             <Pencil className="h-4 w-4" />

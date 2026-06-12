@@ -496,7 +496,7 @@ function HomePage() {
                   return (
                     <li key={t.id} className="flex items-center gap-3 py-2.5">
                       <div className={cn(
-                        "flex h-9 w-9 items-center justify-center rounded-full",
+                        "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
                         t.type === "income" ? "bg-income-soft text-income" : "bg-expense-soft text-expense",
                       )}>
                         {t.type === "income" ? <ArrowDownLeft className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
@@ -511,18 +511,16 @@ function HomePage() {
                               {creator.fullName}
                               <span className="mx-1">•</span>
                               {differenceInDays(new Date(), new Date(t.createdAt)) > 0
-                                ? format(new Date(t.createdAt), "dd MMM yyyy", {
-                                    locale: idLocale,
-                                  })
-                                : formatDistanceToNow(new Date(t.createdAt), {
-                                    addSuffix: true,
-                                    locale: idLocale,
-                                  })}
+                                ? format(new Date(t.createdAt), "dd MMM yyyy", { locale: idLocale })
+                                : formatDistanceToNow(new Date(t.createdAt), { addSuffix: true, locale: idLocale })}
                             </p>
                           </div>
                         )}
                       </div>
-                      <p className={cn("text-sm font-semibold", t.type === "income" ? "text-income" : "text-expense")}>
+                      <p className={cn(
+                        "shrink-0 text-sm font-semibold",
+                        t.type === "income" ? "text-income" : "text-expense"
+                      )}>
                         {t.type === "income" ? "+" : "-"} {formatRupiah(t.amount)}
                       </p>
                     </li>
