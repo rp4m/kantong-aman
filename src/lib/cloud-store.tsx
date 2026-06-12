@@ -309,11 +309,18 @@ export async function addTransaction(tx: Omit<Transaction, "id" | "createdAt"> &
     periodId = it?.budgetPeriodId;
   }
   if (!periodId) {
-    // try infer from active items by date+category
-    const cat = getCategoryByName(tx.category);
-    if (cat) {
-      const it = getActiveBudgetItems(tx.date, cat.id)[0];
-      periodId = it?.budgetPeriodId;
+    // try infer from active items by date+category (expense only)
+    if (tx.type === "expense") {
+      const cat = getCategoryByName(tx.category);
+      if (cat) {
+        const it = getActiveBudgetItems(tx.date, cat.id)[0];
+        periodId = it?.budgetPeriodId;
+      }
+    }
+    // for income, use any active period on the date
+    if (!periodId && tx.type === "income") {
+      const activePeriod = periodCache.find((p) => p.status !== "closed" && p.startDate <= tx.date && p.endDate >= tx.date);
+      periodId = activePeriod?.id;
     }
   }
   if (!periodId) throw new Error("Pilih budget periode terlebih dahulu (buat budget aktif).");
