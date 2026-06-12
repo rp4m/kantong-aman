@@ -517,12 +517,14 @@ function HomePage() {
                           </div>
                         )}
                       </div>
-                      <p className={cn(
-                        "shrink-0 text-sm font-semibold",
-                        t.type === "income" ? "text-income" : "text-expense"
-                      )}>
-                        {t.type === "income" ? "+" : "-"} {formatRupiah(t.amount)}
-                      </p>
+                      <div className="flex shrink-0 flex-col items-end gap-1">
+                        <p className={cn(
+                          "text-sm font-semibold",
+                          t.type === "income" ? "text-income" : "text-expense"
+                        )}>
+                          {t.type === "income" ? "+" : "-"}&nbsp;{formatRupiah(t.amount)}
+                        </p>
+                      </div>
                     </li>
                   );
                 })}

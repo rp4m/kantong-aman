@@ -202,6 +202,7 @@ function TransaksiPage() {
                         )}>
                           {t.type === "income" ? <ArrowDownLeft className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
                         </div>
+
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-medium">{t.category}</p>
                           {t.notes ? <p className="mt-1 truncate text-xs text-muted-foreground">{t.notes}</p> : null}
@@ -218,21 +219,25 @@ function TransaksiPage() {
                             </div>
                           )}
                         </div>
-                        <p className={cn(
-                          "shrink-0 text-sm font-semibold",
-                          t.type === "income" ? "text-income" : "text-expense",
-                        )}>
-                          {t.type === "income" ? "+" : "-"} {formatRupiah(t.amount)}
-                        </p>
-                        <div className="flex shrink-0">
-                          <Button variant="ghost" size="icon" className="h-8 w-8"
-                            onClick={() => { setEditing(t); setOpenForm(true); }}>
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-expense"
-                            onClick={() => setDeleteId(t.id)}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+
+                        {/* nominal + tombol disusun vertikal */}
+                        <div className="flex shrink-0 flex-col items-end gap-1">
+                          <p className={cn(
+                            "text-sm font-semibold",
+                            t.type === "income" ? "text-income" : "text-expense",
+                          )}>
+                            {t.type === "income" ? "+" : "-"} {formatRupiah(t.amount)}
+                          </p>
+                          <div className="flex">
+                            <Button variant="ghost" size="icon" className="h-7 w-7"
+                              onClick={() => { setEditing(t); setOpenForm(true); }}>
+                              <Pencil className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-expense"
+                              onClick={() => setDeleteId(t.id)}>
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
                         </div>
                       </li>
                     );
