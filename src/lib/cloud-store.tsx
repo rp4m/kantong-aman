@@ -324,6 +324,7 @@ export async function addTransaction(tx: Omit<Transaction, "id" | "createdAt"> &
     }
   }
   if (!periodId) throw new Error("Pilih budget periode terlebih dahulu (buat budget aktif).");
+  if (!canAddTransaction(periodId)) throw new Error("Anda tidak memiliki izin untuk menambahkan transaksi ke budget ini.");
   const { data, error } = await supabase.from("transactions").insert({
     budget_period_id: periodId,
     budget_item_id: tx.budgetItemId ?? null,

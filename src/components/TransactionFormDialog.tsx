@@ -32,6 +32,7 @@ import {
   getActiveBudgetItems,
   usePICs,
   useBudgetPeriods,
+  canAddTransaction,
 } from "@/lib/cloud-store";
 import { formatRupiah, todayISO } from "@/lib/budget-format";
 import { toast } from "sonner";
@@ -65,6 +66,7 @@ export function TransactionFormDialog({
   const [category, setCategory] = useState<string>("");
   const [notes, setNotes] = useState("");
   const [budgetItemId, setBudgetItemId] = useState<string>("");
+  const [budgetPeriodId, setBudgetPeriodId] = useState<string>("");
 
   useEffect(() => {
     if (!open) return;
@@ -75,6 +77,7 @@ export function TransactionFormDialog({
       setCategory(initial.category);
       setNotes(initial.notes ?? "");
       setBudgetItemId(initial.budgetItemId ?? "");
+      setBudgetPeriodId("");
     } else {
       const t = defaultType ?? "expense";
       setType(t);
@@ -84,6 +87,7 @@ export function TransactionFormDialog({
       setCategory(defaultCategory && list.includes(defaultCategory) ? defaultCategory : list[0] ?? "");
       setNotes("");
       setBudgetItemId("");
+      setBudgetPeriodId("");
     }
   }, [open, initial, defaultCategory, defaultType, activeExpenseCats]);
 
@@ -92,13 +96,22 @@ export function TransactionFormDialog({
     if (list.length && !list.includes(category)) setCategory(list[0]);
   }, [type, category, activeExpenseCats]);
 
+  // Get active budget periods on the selected date
+  const activePeriods = useMemo(() => {
+    return periods.filter((p) => p.status !== "closed" && p.startDate <= date && p.endDate >= date);
+  }, [periods, date]);
+
   // Auto-match active budget items
   const matchingItems = useMemo(() => {
     if (type !== "expense" || !date || !category) return [];
     const cat = getCategoryByName(category);
     if (!cat) return [];
-    return getActiveBudgetItems(date, cat.id);
-  }, [type, date, category, periods]);
+    let items = getActiveBudgetItems(date, cat.id);
+    if (budgetPeriodId) {
+      items = items.filter((it) => it.budgetPeriodId === budgetPeriodId);
+    }
+    return items;
+  }, [type, date, category, budgetPeriodId, periods]);
 
   useEffect(() => {
     if (matchingItems.length === 1) {
@@ -113,7 +126,7 @@ export function TransactionFormDialog({
   const picById = useMemo(() => new Map(pics.map((p) => [p.id, p])), [pics]);
   const periodById = useMemo(() => new Map(periods.map((p) => [p.id, p])), [periods]);
 
-  const submit = () => {
+  const submit = async () => {
     const numericAmount = Number(amount.replace(/[^\d]/g, ""));
     if (!date) return toast.error("Tanggal wajib diisi");
     if (!numericAmount || numericAmount <= 0) return toast.error("Nominal harus lebih dari 0");
@@ -121,27 +134,32 @@ export function TransactionFormDialog({
     if (type === "expense" && matchingItems.length > 1 && !budgetItemId) {
       return toast.error("Pilih budget yang akan digunakan");
     }
-    const payload: Omit<Transaction, "id" | "createdAt"> = {
+    const payload: Omit<Transaction, "id" | "createdAt"> & { budgetPeriodId?: string } = {
       type, date, amount: numericAmount, category,
       notes: notes.trim(),
       budgetItemId: type === "expense" && budgetItemId ? budgetItemId : undefined,
+      budgetPeriodId: type === "expense" && budgetPeriodId ? budgetPeriodId : undefined,
     };
-    if (initial) {
-      updateTransaction(initial.id, payload);
-      toast.success("Transaksi diperbarui");
-    } else {
-      addTransaction(payload);
-      if (type === "expense") {
-        if (matchingItems.length === 0) {
-          toast.warning("Tidak ada budget aktif untuk kategori ini");
+    try {
+      if (initial) {
+        updateTransaction(initial.id, payload);
+        toast.success("Transaksi diperbarui");
+      } else {
+        await addTransaction(payload);
+        if (type === "expense") {
+          if (matchingItems.length === 0) {
+            toast.warning("Tidak ada budget aktif untuk kategori ini");
+          } else {
+            toast.success("Transaksi ditambahkan");
+          }
         } else {
           toast.success("Transaksi ditambahkan");
         }
-      } else {
-        toast.success("Transaksi ditambahkan");
       }
+      onOpenChange(false);
+    } catch (e) {
+      toast.error((e as Error).message);
     }
-    onOpenChange(false);
   };
 
   const list: readonly string[] = type === "income" ? INCOME_CATEGORIES : activeExpenseCats;
@@ -187,6 +205,20 @@ export function TransactionFormDialog({
               </Select>
             </div>
           </div>
+
+          {type === "expense" && activePeriods.length > 1 && (
+            <div className="space-y-2">
+              <Label>Pilih Budget Periode</Label>
+              <Select value={budgetPeriodId} onValueChange={setBudgetPeriodId}>
+                <SelectTrigger><SelectValue placeholder="Pilih budget periode" /></SelectTrigger>
+                <SelectContent>
+                  {activePeriods.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {type === "expense" && matchingItems.length > 1 && (
             <div className="space-y-2">

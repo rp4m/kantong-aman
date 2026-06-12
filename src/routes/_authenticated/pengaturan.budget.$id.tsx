@@ -17,7 +17,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   useBudgetPeriods, useBudgetItems, useCategories, usePICs,
-  addBudgetItem, updateBudgetItem, deleteBudgetItem, getRealizationForItem,
+  addBudgetItem, updateBudgetItem, deleteBudgetItem, getRealizationForItem, canEditBudget,
 } from "@/lib/cloud-store";
 import type { BudgetItem } from "@/lib/budget-types";
 import { CollaboratorsSection } from "@/components/CollaboratorsSection";
@@ -37,6 +37,7 @@ function BudgetDetailPage() {
   const pics = usePICs();
   const period = periods.find((p) => p.id === id);
   const periodItems = useMemo(() => items.filter((it) => it.budgetPeriodId === id), [items, id]);
+  const isOwner = canEditBudget(id);
 
   const catById = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
   const picById = useMemo(() => new Map(pics.map((p) => [p.id, p])), [pics]);
@@ -50,11 +51,30 @@ function BudgetDetailPage() {
   }, [periodItems, items]);
 
   const [filterPic, setFilterPic] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
   const filteredRows = useMemo(() => {
-    if (filterPic === "all") return rows;
-    return rows.filter((r) => r.item.picId === filterPic);
-  }, [rows, filterPic]);
+    let filtered = filterPic === "all" ? rows : rows.filter((r) => r.item.picId === filterPic);
+
+    filtered = [...filtered].sort((a, b) => {
+      const catNameA = catById.get(a.item.categoryId)?.name ?? "";
+      const catNameB = catById.get(b.item.categoryId)?.name ?? "";
+
+      let compareResult = 0;
+      if (sortBy === "name") {
+        compareResult = catNameA.localeCompare(catNameB);
+      } else if (sortBy === "amount") {
+        compareResult = a.item.amount - b.item.amount;
+      } else if (sortBy === "realized") {
+        compareResult = a.realized - b.realized;
+      }
+
+      return sortOrder === "asc" ? compareResult : -compareResult;
+    });
+
+    return filtered;
+  }, [rows, filterPic, sortBy, sortOrder, catById]);
 
   const totalBudget = filteredRows.reduce((a, r) => a + r.item.amount, 0);
   const totalReal = filteredRows.reduce((a, r) => a + r.realized, 0);
@@ -83,9 +103,11 @@ function BudgetDetailPage() {
       title={period.name}
       subtitle={formatDateRange(period.startDate, period.endDate)}
       action={
-        <Button size="sm" className="rounded-full" onClick={() => { setEditing(null); setOpenForm(true); }}>
-          <Plus className="mr-1 h-4 w-4" /> Item
-        </Button>
+        isOwner && (
+          <Button size="sm" className="rounded-full" onClick={() => { setEditing(null); setOpenForm(true); }}>
+            <Plus className="mr-1 h-4 w-4" /> Item
+          </Button>
+        )
       }
     >
       <Link to="/pengaturan/budget" className="mb-3 inline-flex items-center gap-1 text-xs font-medium text-muted-foreground">
@@ -160,6 +182,29 @@ function BudgetDetailPage() {
             <span>{filteredRows.length} item</span>
           </div>
         </div>
+
+        {filteredRows.length > 0 && (
+          <div className="mb-4 flex flex-wrap gap-2">
+            <div className="flex items-center gap-1">
+              <span className="text-xs text-muted-foreground">Urutkan:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="rounded-md border border-border bg-background px-2 py-1 text-xs"
+              >
+                <option value="name">Nama Kategori</option>
+                <option value="amount">Total Budget</option>
+                <option value="realized">Realisasi</option>
+              </select>
+              <button
+                onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                className="rounded-md border border-border bg-background px-2 py-1 text-xs hover:bg-muted"
+              >
+                {sortOrder === "asc" ? "↑" : "↓"}
+              </button>
+            </div>
+          </div>
+        )}
         {filteredRows.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border bg-muted/40 p-6 text-center text-xs text-muted-foreground">
             Belum ada item. Tambahkan kategori + PIC.
@@ -182,14 +227,16 @@ function BudgetDetailPage() {
                       </div>
                       {item.notes && <p className="mt-0.5 text-xs text-muted-foreground">{item.notes}</p>}
                     </div>
-                    <div className="flex">
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setEditing(item); setOpenForm(true); }}>
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-expense" onClick={() => setDeleteId(item.id)}>
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
+                    {isOwner && (
+                      <div className="flex">
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setEditing(item); setOpenForm(true); }}>
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-expense" onClick={() => setDeleteId(item.id)}>
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    )}
                   </div>
                   <div className="mt-2 flex items-center justify-between text-xs">
                     <span className="text-muted-foreground">
