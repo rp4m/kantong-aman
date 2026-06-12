@@ -522,7 +522,7 @@ function HomePage() {
                           "text-sm font-semibold",
                           t.type === "income" ? "text-income" : "text-expense"
                         )}>
-                          {t.type === "income" ? "+" : "-"}&nbsp;{formatRupiah(t.amount)}
+                          {formatRupiah(t.amount)}
                         </p>
                       </div>
                     </li>

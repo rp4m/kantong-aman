@@ -187,8 +187,8 @@ function TransaksiPage() {
                 <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
                   <p className="text-xs font-semibold text-muted-foreground">{formatDate(date)}</p>
                   <div className="flex gap-2 text-[11px]">
-                    {dayIncome > 0 && <span className="text-income">+{formatRupiah(dayIncome)}</span>}
-                    {dayExpense > 0 && <span className="text-expense">-{formatRupiah(dayExpense)}</span>}
+                    {dayIncome > 0 && <span className="text-income">{formatRupiah(dayIncome)}</span>}
+                    {dayExpense > 0 && <span className="text-expense">{formatRupiah(dayExpense)}</span>}
                   </div>
                 </div>
                 <ul className="divide-y divide-border">
@@ -226,7 +226,7 @@ function TransaksiPage() {
                             "text-sm font-semibold",
                             t.type === "income" ? "text-income" : "text-expense",
                           )}>
-                            {t.type === "income" ? "+" : "-"} {formatRupiah(t.amount)}
+                            {formatRupiah(t.amount)}
                           </p>
                           <div className="flex">
                             <Button variant="ghost" size="icon" className="h-7 w-7"
