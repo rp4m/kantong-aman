@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { ArrowDownLeft, ArrowUpRight, Plus, PiggyBank, Wallet, TriangleAlert as AlertTriangle, Users, Calendar as CalendarIcon, ChevronRight, ChevronDown, ChevronUp } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, ReferenceDot } from "recharts";
 import { AppShell } from "@/components/AppShell";
+import { CategoryTransactionsDialog } from "@/components/CategoryTransactionsDialog";
 import { StatCard } from "@/components/StatCard";
 import { TransactionFormDialog } from "@/components/TransactionFormDialog";
 import { Button } from "@/components/ui/button";
@@ -97,6 +98,8 @@ function HomePage() {
   });
   const [calOpen, setCalOpen] = useState(false);
   const [isExpandedCategories, setIsExpandedCategories] = useState(false);
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+  const [selectedCategoryForDetail, setSelectedCategoryForDetail] = useState("");
 
   const range = useMemo(() => rangeFor(filterKey, customRange), [filterKey, customRange]);
 
@@ -418,7 +421,14 @@ function HomePage() {
                   {displayedCategories.map((r) => {
                     const itone = r.pct >= 100 ? "expense" : r.pct >= 80 ? "warning" : "primary";
                     return (
-                      <li key={r.id} className="rounded-xl bg-muted/40 p-3">
+                      <li
+                        key={r.id}
+                        className="rounded-xl bg-muted/40 p-3 hover:bg-muted/70 cursor-pointer transition-colors active:scale-[0.99]"
+                        onClick={() => {
+                          setSelectedCategoryForDetail(r.categoryName);
+                          setIsDetailDialogOpen(true);
+                        }}
+                      >
                         <div className="flex items-center justify-between gap-2">
                           <div className="flex min-w-0 items-center gap-2">
                             <p className="truncate text-sm font-medium">{r.categoryName}</p>
@@ -578,6 +588,11 @@ function HomePage() {
       )}
 
       <TransactionFormDialog open={openForm} onOpenChange={setOpenForm} />
+      <CategoryTransactionsDialog
+        isOpen={isDetailDialogOpen}
+        onOpenChange={setIsDetailDialogOpen}
+        categoryName={selectedCategoryForDetail}
+      />
     </AppShell>
   );
 }

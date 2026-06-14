@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState, useEffect } from "react";
 import { ArrowLeft, Plus, Pencil, Trash2 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
+import { CategoryTransactionsDialog } from "@/components/CategoryTransactionsDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -53,6 +54,8 @@ function BudgetDetailPage() {
   const [filterPic, setFilterPic] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("name");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+  const [selectedCategoryForDetail, setSelectedCategoryForDetail] = useState("");
 
   const filteredRows = useMemo(() => {
     let filtered = filterPic === "all" ? rows : rows.filter((r) => r.item.picId === filterPic);
@@ -219,7 +222,14 @@ function BudgetDetailPage() {
               const pic = picById.get(item.picId);
               const tone = pct >= 100 ? "expense" : pct >= 80 ? "warning" : "primary";
               return (
-                <li key={item.id} className="rounded-xl bg-muted/40 p-3">
+                <li
+                  key={item.id}
+                  className="rounded-xl bg-muted/40 p-3 hover:bg-muted/70 cursor-pointer transition-colors active:scale-[0.99]"
+                  onClick={() => {
+                    setSelectedCategoryForDetail(cat?.name ?? "");
+                    setIsDetailDialogOpen(true);
+                  }}
+                >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
@@ -231,7 +241,7 @@ function BudgetDetailPage() {
                       {item.notes && <p className="mt-0.5 text-xs text-muted-foreground">{item.notes}</p>}
                     </div>
                     {isOwner && (
-                      <div className="flex">
+                      <div className="flex animate-none" onClick={(e) => e.stopPropagation()}>
                         <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setEditing(item); setOpenForm(true); }}>
                           <Pencil className="h-3.5 w-3.5" />
                         </Button>
@@ -292,6 +302,11 @@ function BudgetDetailPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <CategoryTransactionsDialog
+        isOpen={isDetailDialogOpen}
+        onOpenChange={setIsDetailDialogOpen}
+        categoryName={selectedCategoryForDetail}
+      />
     </AppShell>
   );
 }
