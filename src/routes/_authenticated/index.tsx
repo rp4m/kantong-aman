@@ -71,7 +71,7 @@ function rangeFor(
           label: formatDate(todayISO()),
         };
       }
-      
+
       return {
         start: toISODate(custom.from),
         end: toISODate(custom.to),
@@ -99,7 +99,7 @@ function HomePage() {
 
   const range = useMemo(() => rangeFor(filterKey, customRange), [filterKey, customRange]);
 
-  // Budgets whose period overlaps with the selected date range
+  // Budgets whose period overlaps with the selected date ranges
   const filteredPeriods = useMemo(() => {
     const { start, end } = range;
     return periods.filter((p) => {
@@ -271,7 +271,7 @@ function HomePage() {
                 }))
               }
             />
-        
+
             <Input
               type="date"
               className="w-40"
