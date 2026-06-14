@@ -68,6 +68,8 @@ function BudgetDetailPage() {
         compareResult = a.item.amount - b.item.amount;
       } else if (sortBy === "realized") {
         compareResult = a.realized - b.realized;
+      } else if (sortBy === "percentage") {
+        compareResult = a.pct - b.pct;
       }
 
       return sortOrder === "asc" ? compareResult : -compareResult;
@@ -195,6 +197,7 @@ function BudgetDetailPage() {
                 <option value="name">Nama Kategori</option>
                 <option value="amount">Total Budget</option>
                 <option value="realized">Realisasi</option>
+                <option value="percentage">Persen Terpakai (%)</option>
               </select>
               <button
                 onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}

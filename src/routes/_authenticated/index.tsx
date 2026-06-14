@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ArrowDownLeft, ArrowUpRight, Plus, PiggyBank, Wallet, TriangleAlert as AlertTriangle, Users, Calendar as CalendarIcon, ChevronRight, ChevronDown } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Plus, PiggyBank, Wallet, TriangleAlert as AlertTriangle, Users, Calendar as CalendarIcon, ChevronRight, ChevronDown, ChevronUp } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, ReferenceDot } from "recharts";
 import { AppShell } from "@/components/AppShell";
 import { StatCard } from "@/components/StatCard";
@@ -96,6 +96,7 @@ function HomePage() {
     to: endOfMonth(new Date()),
   });
   const [calOpen, setCalOpen] = useState(false);
+  const [isExpandedCategories, setIsExpandedCategories] = useState(false);
 
   const range = useMemo(() => rangeFor(filterKey, customRange), [filterKey, customRange]);
 
@@ -191,9 +192,27 @@ function HomePage() {
       catMap.set(key, cur);
     });
 
+    const latestTxTimeByCategory = new Map<string, string>();
+    transactions.forEach((t) => {
+      if (!t.category) return;
+      const cur = latestTxTimeByCategory.get(t.category);
+      if (!cur || t.createdAt > cur) {
+        latestTxTimeByCategory.set(t.category, t.createdAt);
+      }
+    });
+
     const catRows = Array.from(catMap.values()).map((r) => ({
       ...r, sisa: r.budget - r.actual, pct: r.budget > 0 ? (r.actual / r.budget) * 100 : 0,
-    })).sort((a, b) => b.budget - a.budget);
+    })).sort((a, b) => {
+      const timeA = latestTxTimeByCategory.get(a.categoryName) || "";
+      const timeB = latestTxTimeByCategory.get(b.categoryName) || "";
+      if (timeA && timeB) {
+        return timeB.localeCompare(timeA);
+      }
+      if (timeA) return -1;
+      if (timeB) return 1;
+      return b.budget - a.budget;
+    });
 
     // PIC aggregation
     type PicRow = { id: string; name: string; budget: number; actual: number; sisa: number; pct: number; count: number };
@@ -227,7 +246,7 @@ function HomePage() {
       overBudgetCats, nearLimitCats,
       totalIncome, totalExpense,
     };
-  }, [filteredPeriods, filteredItems, filteredTransactions, categories, pics]);
+  }, [filteredPeriods, filteredItems, filteredTransactions, categories, pics, transactions]);
 
   const tone = data.util >= 100 ? "expense" : data.util >= 80 ? "warning" : "primary";
 
@@ -237,6 +256,10 @@ function HomePage() {
     year: "Tahun Ini",
     custom: "Custom",
   };
+
+  const displayedCategories = isExpandedCategories
+    ? data.catRows
+    : data.catRows.slice(0, 5);
 
   return (
     <AppShell
@@ -390,44 +413,64 @@ function HomePage() {
             {data.catRows.length === 0 ? (
               <EmptyHint text="Belum ada budget item untuk periode ini." />
             ) : (
-              <ul className="space-y-2.5">
-                {data.catRows.map((r) => {
-                  const itone = r.pct >= 100 ? "expense" : r.pct >= 80 ? "warning" : "primary";
-                  return (
-                    <li key={r.id} className="rounded-xl bg-muted/40 p-3">
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex min-w-0 items-center gap-2">
-                          <p className="truncate text-sm font-medium">{r.categoryName}</p>
-                          <span className="truncate rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
-                            {r.picName}
+              <>
+                <ul className="space-y-2.5">
+                  {displayedCategories.map((r) => {
+                    const itone = r.pct >= 100 ? "expense" : r.pct >= 80 ? "warning" : "primary";
+                    return (
+                      <li key={r.id} className="rounded-xl bg-muted/40 p-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex min-w-0 items-center gap-2">
+                            <p className="truncate text-sm font-medium">{r.categoryName}</p>
+                            <span className="truncate rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
+                              {r.picName}
+                            </span>
+                          </div>
+                          <span className={cn(
+                            "rounded-full px-1.5 py-0.5 text-[10px] font-semibold",
+                            itone === "expense" && "bg-expense-soft text-expense",
+                            itone === "warning" && "bg-warning/30 text-warning-foreground",
+                            itone === "primary" && "bg-primary/15 text-primary",
+                          )}>{r.pct % 1 === 0 ? r.pct.toFixed(0) : r.pct.toFixed(1)}%</span>
+                        </div>
+                        <div className="mt-1 flex justify-between text-[11px] text-muted-foreground">
+                          <span>{formatRupiah(r.actual)} / {formatRupiah(r.budget)}</span>
+                          <span className={r.sisa < 0 ? "text-expense font-medium" : ""}>
+                            {r.sisa >= 0 ? "Sisa " : "Over "}{formatRupiah(Math.abs(r.sisa))}
                           </span>
                         </div>
-                        <span className={cn(
-                          "rounded-full px-1.5 py-0.5 text-[10px] font-semibold",
-                          itone === "expense" && "bg-expense-soft text-expense",
-                          itone === "warning" && "bg-warning/30 text-warning-foreground",
-                          itone === "primary" && "bg-primary/15 text-primary",
-                        )}>{r.pct % 1 === 0 ? r.pct.toFixed(0) : r.pct.toFixed(1)}%</span>
-                      </div>
-                      <div className="mt-1 flex justify-between text-[11px] text-muted-foreground">
-                        <span>{formatRupiah(r.actual)} / {formatRupiah(r.budget)}</span>
-                        <span className={r.sisa < 0 ? "text-expense font-medium" : ""}>
-                          {r.sisa >= 0 ? "Sisa " : "Over "}{formatRupiah(Math.abs(r.sisa))}
-                        </span>
-                      </div>
-                      <Progress
-                        value={Math.min(r.pct, 100)}
-                        className={cn(
-                          "mt-1.5 h-1.5",
-                          itone === "expense" && "[&>div]:bg-expense",
-                          itone === "warning" && "[&>div]:bg-warning",
-                          itone === "primary" && "[&>div]:bg-primary",
-                        )}
-                      />
-                    </li>
-                  );
-                })}
-              </ul>
+                        <Progress
+                          value={Math.min(r.pct, 100)}
+                          className={cn(
+                            "mt-1.5 h-1.5",
+                            itone === "expense" && "[&>div]:bg-expense",
+                            itone === "warning" && "[&>div]:bg-warning",
+                            itone === "primary" && "[&>div]:bg-primary",
+                          )}
+                        />
+                      </li>
+                    );
+                  })}
+                </ul>
+                {data.catRows.length > 5 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="mt-3 w-full text-xs font-medium text-muted-foreground hover:text-foreground flex items-center justify-center gap-1"
+                    onClick={() => setIsExpandedCategories(!isExpandedCategories)}
+                  >
+                    {isExpandedCategories ? (
+                      <>
+                        Sembunyikan <ChevronUp className="h-3.5 w-3.5" />
+                      </>
+                    ) : (
+                      <>
+                        Lihat Semua ({data.catRows.length}) <ChevronDown className="h-3.5 w-3.5" />
+                      </>
+                    )}
+                  </Button>
+                )}
+              </>
             )}
           </section>
 
