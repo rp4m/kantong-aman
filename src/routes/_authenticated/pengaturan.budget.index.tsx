@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   useBudgetPeriods, useBudgetItems,
-  addBudgetPeriod, updateBudgetPeriod, deleteBudgetPeriod, cloneBudgetPeriod,
+  addBudgetPeriod, updateBudgetPeriod, deleteBudgetPeriod, cloneBudgetPeriod, canEditBudget,
 } from "@/lib/cloud-store";
 import type { BudgetPeriod, BudgetPeriodStatus } from "@/lib/budget-types";
 import { formatRupiah, formatDateRange, todayISO } from "@/lib/budget-format";
@@ -96,33 +96,38 @@ function BudgetListPage() {
         </div>
       ) : (
         <ul className="space-y-3">
-          {sorted.map((p) => (
-            <li key={p.id} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-              <div className="flex items-start gap-3">
-                <Link to="/pengaturan/budget/$id" params={{ id: p.id }} className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="truncate text-sm font-semibold">{p.name}</p>
-                    <span className={cn("rounded-full px-1.5 py-0.5 text-[10px] font-semibold", STATUS_CLASS[p.status])}>
-                      {STATUS_LABEL[p.status]}
-                    </span>
-                  </div>
-                  <p className="mt-0.5 text-xs text-muted-foreground">{formatDateRange(p.startDate, p.endDate)}</p>
-                  <div className="mt-2 flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">{countByPeriod.get(p.id) ?? 0} item</span>
-                    <span className="font-semibold text-primary">{formatRupiah(totalByPeriod.get(p.id) ?? 0)}</span>
-                  </div>
-                </Link>
-                <div className="flex flex-col gap-1">
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setEditing(p); setOpenForm(true); }}>
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-expense" onClick={() => setDeleteId(p.id)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+          {sorted.map((p) => {
+            const isOwner = canEditBudget(p.id);
+            return (
+              <li key={p.id} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+                <div className="flex items-start gap-3">
+                  <Link to="/pengaturan/budget/$id" params={{ id: p.id }} className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="truncate text-sm font-semibold">{p.name}</p>
+                      <span className={cn("rounded-full px-1.5 py-0.5 text-[10px] font-semibold", STATUS_CLASS[p.status])}>
+                        {STATUS_LABEL[p.status]}
+                      </span>
+                    </div>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{formatDateRange(p.startDate, p.endDate)}</p>
+                    <div className="mt-2 flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">{countByPeriod.get(p.id) ?? 0} item</span>
+                      <span className="font-semibold text-primary">{formatRupiah(totalByPeriod.get(p.id) ?? 0)}</span>
+                    </div>
+                  </Link>
+                  {isOwner && (
+                    <div className="flex flex-col gap-1">
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setEditing(p); setOpenForm(true); }}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-expense" onClick={() => setDeleteId(p.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
-              </div>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
       )}
 
