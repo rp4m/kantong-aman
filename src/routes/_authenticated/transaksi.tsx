@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   Plus, Search, Filter, Pencil, Trash2,
   ArrowDownLeft, ArrowUpRight, X,
@@ -35,6 +35,9 @@ export const Route = createFileRoute("/_authenticated/transaksi")({
       { name: "description", content: "Daftar pemasukan & pengeluaran." },
     ],
   }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    filterCategory: typeof search.filterCategory === "string" ? search.filterCategory : undefined,
+  }),
   component: TransaksiPage,
 });
 
@@ -45,6 +48,7 @@ function TransaksiPage() {
   const items = useBudgetItems();
   useProfiles();
   const { userId } = useCurrentUser();
+  const { filterCategory: initialFilterCategory } = Route.useSearch();
 
   // tx.budgetItemId → picId
   const txToPicId = useMemo(() => {
@@ -69,6 +73,13 @@ function TransaksiPage() {
   const [filterFrom, setFilterFrom] = useState<string>("");
   const [filterTo, setFilterTo] = useState<string>("");
   const [filterOnlyMe, setFilterOnlyMe] = useState(false);
+
+  // Apply pre-set category from URL search param (e.g. from CategoryTransactionsDialog)
+  useEffect(() => {
+    if (initialFilterCategory) {
+      setFilterCategory(initialFilterCategory);
+    }
+  }, [initialFilterCategory]);
 
   const filtered = useMemo(() => {
     return transactions
@@ -106,6 +117,34 @@ function TransaksiPage() {
     setFilterFrom(""); setFilterTo(""); setFilterOnlyMe(false);
   };
 
+  // Build active filter chip list
+  const activeFilterChips = useMemo(() => {
+    const chips: { label: string; onRemove: () => void }[] = [];
+    if (filterType !== "all") {
+      chips.push({
+        label: filterType === "income" ? "Pemasukan" : "Pengeluaran",
+        onRemove: () => setFilterType("all"),
+      });
+    }
+    if (filterCategory !== "all") {
+      chips.push({ label: filterCategory, onRemove: () => setFilterCategory("all") });
+    }
+    if (filterPic !== "all") {
+      const picName = pics.find((p) => p.id === filterPic)?.name ?? filterPic;
+      chips.push({ label: `PIC: ${picName}`, onRemove: () => setFilterPic("all") });
+    }
+    if (filterFrom) {
+      chips.push({ label: `Dari: ${filterFrom}`, onRemove: () => setFilterFrom("") });
+    }
+    if (filterTo) {
+      chips.push({ label: `Sampai: ${filterTo}`, onRemove: () => setFilterTo("") });
+    }
+    if (filterOnlyMe) {
+      chips.push({ label: "Hanya saya", onRemove: () => setFilterOnlyMe(false) });
+    }
+    return chips;
+  }, [filterType, filterCategory, filterPic, filterFrom, filterTo, filterOnlyMe, pics]);
+
   return (
     <AppShell title="Transaksi" subtitle={`${filtered.length} transaksi`}>
       <div className="flex items-center gap-2">
@@ -120,7 +159,7 @@ function TransaksiPage() {
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="outline" size="icon"
-              className={cn("rounded-full", hasActiveFilter && "border-primary text-primary")}>
+              className={cn("rounded-full", hasActiveFilter && "border-primary text-primary bg-primary/5")}>
               <Filter className="h-4 w-4" />
             </Button>
           </PopoverTrigger>
@@ -190,6 +229,34 @@ function TransaksiPage() {
           </PopoverContent>
         </Popover>
       </div>
+
+      {/* Active filter chips */}
+      {activeFilterChips.length > 0 && (
+        <div className="mt-3 flex flex-wrap items-center gap-1.5">
+          <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground mr-0.5">Filter:</span>
+          {activeFilterChips.map((chip) => (
+            <span
+              key={chip.label}
+              className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary"
+            >
+              {chip.label}
+              <button
+                onClick={chip.onRemove}
+                className="ml-0.5 rounded-full hover:text-primary/60 transition-colors"
+                aria-label={`Hapus filter ${chip.label}`}
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          ))}
+          <button
+            onClick={clearFilters}
+            className="ml-1 text-[11px] text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors"
+          >
+            Hapus semua
+          </button>
+        </div>
+      )}
 
       <div className="mt-4 space-y-4 pb-20">
         {grouped.length === 0 ? (
