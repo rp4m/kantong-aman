@@ -18,13 +18,15 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   useTransactions, deleteTransaction, useCategories, usePICs, useBudgetItems,
-  useProfiles, getProfileById,
+  useProfiles, getProfileById, useCurrentUser,
 } from "@/lib/cloud-store";
 import { formatRupiah, formatDate } from "@/lib/budget-format";
 import { INCOME_CATEGORIES, type Transaction } from "@/lib/budget-types";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow, differenceInDays, format as formatDate2 } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
+import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/transaksi")({
   head: () => ({
@@ -42,6 +44,7 @@ function TransaksiPage() {
   const pics = usePICs();
   const items = useBudgetItems();
   useProfiles();
+  const { userId } = useCurrentUser();
 
   // tx.budgetItemId → picId
   const txToPicId = useMemo(() => {
@@ -65,6 +68,7 @@ function TransaksiPage() {
   const [filterPic, setFilterPic] = useState<string>("all");
   const [filterFrom, setFilterFrom] = useState<string>("");
   const [filterTo, setFilterTo] = useState<string>("");
+  const [filterOnlyMe, setFilterOnlyMe] = useState(false);
 
   const filtered = useMemo(() => {
     return transactions
@@ -79,10 +83,11 @@ function TransaksiPage() {
         }
         if (filterFrom && t.date < filterFrom) return false;
         if (filterTo && t.date > filterTo) return false;
+        if (filterOnlyMe && t.createdBy !== userId) return false;
         return true;
       })
       .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.createdAt.localeCompare(a.createdAt)));
-  }, [transactions, search, filterType, filterCategory, filterPic, filterFrom, filterTo, txToPicId]);
+  }, [transactions, search, filterType, filterCategory, filterPic, filterFrom, filterTo, txToPicId, filterOnlyMe, userId]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, Transaction[]>();
@@ -94,11 +99,11 @@ function TransaksiPage() {
   }, [filtered]);
 
   const hasActiveFilter =
-    filterType !== "all" || filterCategory !== "all" || filterPic !== "all" || !!filterFrom || !!filterTo;
+    filterType !== "all" || filterCategory !== "all" || filterPic !== "all" || !!filterFrom || !!filterTo || filterOnlyMe;
 
   const clearFilters = () => {
     setFilterType("all"); setFilterCategory("all"); setFilterPic("all");
-    setFilterFrom(""); setFilterTo("");
+    setFilterFrom(""); setFilterTo(""); setFilterOnlyMe(false);
   };
 
   return (
@@ -158,6 +163,19 @@ function TransaksiPage() {
                   {pics.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
                 </SelectContent>
               </Select>
+            </div>
+            <div className="flex items-center space-x-2 pt-1 pb-1">
+              <Checkbox
+                id="only-me"
+                checked={filterOnlyMe}
+                onCheckedChange={(checked) => setFilterOnlyMe(checked === true)}
+              />
+              <label
+                htmlFor="only-me"
+                className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+              >
+                Hanya saya
+              </label>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1.5">
