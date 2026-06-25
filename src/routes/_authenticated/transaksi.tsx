@@ -28,6 +28,8 @@ import { id as idLocale } from "date-fns/locale";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 
+const PAGE_SIZE = 20;
+
 export const Route = createFileRoute("/_authenticated/transaksi")({
   head: () => ({
     meta: [
@@ -73,6 +75,7 @@ function TransaksiPage() {
   const [filterFrom, setFilterFrom] = useState<string>("");
   const [filterTo, setFilterTo] = useState<string>("");
   const [filterOnlyMe, setFilterOnlyMe] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   // Apply pre-set category from URL search param (e.g. from CategoryTransactionsDialog)
   useEffect(() => {
@@ -80,6 +83,10 @@ function TransaksiPage() {
       setFilterCategory(initialFilterCategory);
     }
   }, [initialFilterCategory]);
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [search, filterType, filterCategory, filterPic, filterFrom, filterTo, filterOnlyMe]);
 
   const filtered = useMemo(() => {
     return transactions
@@ -100,14 +107,18 @@ function TransaksiPage() {
       .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : b.createdAt.localeCompare(a.createdAt)));
   }, [transactions, search, filterType, filterCategory, filterPic, filterFrom, filterTo, txToPicId, filterOnlyMe, userId]);
 
+  const visibleTransactions = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
+
   const grouped = useMemo(() => {
     const map = new Map<string, Transaction[]>();
-    filtered.forEach((t) => {
+    visibleTransactions.forEach((t) => {
       const arr = map.get(t.date) ?? [];
       arr.push(t); map.set(t.date, arr);
     });
     return Array.from(map.entries());
-  }, [filtered]);
+  }, [visibleTransactions]);
+
+  const hasMore = visibleCount < filtered.length;
 
   const hasActiveFilter =
     filterType !== "all" || filterCategory !== "all" || filterPic !== "all" || !!filterFrom || !!filterTo || filterOnlyMe;
@@ -146,7 +157,7 @@ function TransaksiPage() {
   }, [filterType, filterCategory, filterPic, filterFrom, filterTo, filterOnlyMe, pics]);
 
   return (
-    <AppShell title="Transaksi" subtitle={`${filtered.length} transaksi`}>
+    <AppShell title="Transaksi" subtitle={`${Math.min(visibleCount, filtered.length)} dari ${filtered.length} transaksi`}>
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -258,7 +269,7 @@ function TransaksiPage() {
         </div>
       )}
 
-      <div className="mt-4 space-y-4 pb-20">
+      <div className="mt-4 space-y-4 pb-24">
         {grouped.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">
             Tidak ada transaksi.
@@ -331,6 +342,14 @@ function TransaksiPage() {
               </div>
             );
           })
+        )}
+
+        {hasMore && (
+          <div className="flex justify-center">
+            <Button variant="outline" onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)} className="rounded-full px-4">
+              Tampilkan selanjutnya
+            </Button>
+          </div>
         )}
       </div>
 
