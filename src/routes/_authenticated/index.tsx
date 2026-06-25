@@ -130,18 +130,23 @@ function HomePage() {
       // if (t.date < start || t.date > end) return false;
       // Must belong to one of the filtered budgets
       // Check via budgetItemId
-      if (t.budgetItemId && filteredItemIds.has(t.budgetItemId)) return true;
+      const matchItem = (t.budgetItemId && filteredItemIds.has(t.budgetItemId));
       // Check via budgetPeriodId
-      if ((t as any).budgetPeriodId && filteredPeriodIds.has((t as any).budgetPeriodId)) return true;
+      const matchPeriod = ((t as any).budgetPeriodId && filteredPeriodIds.has((t as any).budgetPeriodId));
       // For expense: match by category to a filtered item
+      let matchExpense = true;
       if (t.type === "expense") {
         const cat = categories.find((c) => c.name === t.category);
-        if (cat && filteredItems.some((it) => it.categoryId === cat.id)) return true;
+        matchExpense = (cat && filteredItems.some((it) => it.categoryId === cat.id));
       }
       // For income transactions linked to a filtered period
+      let matchIncome = true;
       if (t.type === "income") {
-        if ((t as any).budgetPeriodId && filteredPeriodIds.has((t as any).budgetPeriodId)) return true;
+        matchIncome = ((t as any).budgetPeriodId && filteredPeriodIds.has((t as any).budgetPeriodId));
       }
+
+      if(matchItem && matchPeriod && matchExpense && matchIncome) return true;
+
       return false;
     });
   }, [transactions, categories, filteredItems, filteredPeriodIds, range]);
