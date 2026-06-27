@@ -37,6 +37,11 @@ import {
 import { formatRupiah, todayISO } from "@/lib/budget-format";
 import { toast } from "sonner";
 
+const getCategoryOptions = (transactionType: TransactionType, activeExpenseCats: readonly string[]) => {
+  const list = transactionType === "income" ? INCOME_CATEGORIES : activeExpenseCats;
+  return [...list].sort((a, b) => a.localeCompare(b, "id", { sensitivity: "base" }));
+};
+
 interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
@@ -55,12 +60,15 @@ export function TransactionFormDialog({
   const categories = useCategories();
   const pics = usePICs();
   const periods = useBudgetPeriods();
+  const [type, setType] = useState<TransactionType>("expense");
   const activeExpenseCats = useMemo(
     () => categories.filter((c) => c.isActive).map((c) => c.name),
     [categories],
   );
-
-  const [type, setType] = useState<TransactionType>("expense");
+  const categoryOptions = useMemo(
+    () => getCategoryOptions(type, activeExpenseCats),
+    [type, activeExpenseCats],
+  );
   const [date, setDate] = useState(todayISO());
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState<string>("");
@@ -83,18 +91,17 @@ export function TransactionFormDialog({
       setType(t);
       setDate(todayISO());
       setAmount("");
-      const list: readonly string[] = t === "income" ? INCOME_CATEGORIES : activeExpenseCats;
+      const list = categoryOptions;
       setCategory(defaultCategory && list.includes(defaultCategory) ? defaultCategory : list[0] ?? "");
       setNotes("");
       setBudgetItemId("");
       setBudgetPeriodId("");
     }
-  }, [open, initial, defaultCategory, defaultType, activeExpenseCats]);
+  }, [open, initial, defaultCategory, defaultType, categoryOptions]);
 
   useEffect(() => {
-    const list: readonly string[] = type === "income" ? INCOME_CATEGORIES : activeExpenseCats;
-    if (list.length && !list.includes(category)) setCategory(list[0]);
-  }, [type, category, activeExpenseCats]);
+    if (categoryOptions.length && !categoryOptions.includes(category)) setCategory(categoryOptions[0]);
+  }, [categoryOptions, category]);
 
   // Get active budget periods on the selected date
   const activePeriods = useMemo(() => {
@@ -162,8 +169,6 @@ export function TransactionFormDialog({
     }
   };
 
-  const list: readonly string[] = type === "income" ? INCOME_CATEGORIES : activeExpenseCats;
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
@@ -198,9 +203,9 @@ export function TransactionFormDialog({
             <div className="space-y-2">
               <Label>Kategori</Label>
               <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger><SelectValue placeholder={list.length ? "Pilih kategori" : "Belum ada kategori"} /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder={categoryOptions.length ? "Pilih kategori" : "Belum ada kategori"} /></SelectTrigger>
                 <SelectContent>
-                  {list.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  {categoryOptions.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
