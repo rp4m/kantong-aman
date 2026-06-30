@@ -6,6 +6,7 @@ import { AppShell } from "@/components/AppShell";
 import { CategoryTransactionsDialog } from "@/components/CategoryTransactionsDialog";
 import { StatCard } from "@/components/StatCard";
 import { TransactionFormDialog } from "@/components/TransactionFormDialog";
+import { TransactionDetailDialog } from "@/components/TransactionDetailDialog";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,7 @@ import {
   useCurrentUser, useProfiles, getProfileById,
 } from "@/lib/cloud-store";
 import { formatRupiah, formatRupiahShort, formatDate, formatDateRange, todayISO, toISODate } from "@/lib/budget-format";
+import type { Transaction } from "@/lib/budget-types";
 import { cn } from "@/lib/utils";
 import { startOfMonth, endOfMonth, startOfYear, endOfYear, subDays, format, formatDistanceToNow, differenceInDays } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
@@ -100,6 +102,7 @@ function HomePage() {
   const [isExpandedCategories, setIsExpandedCategories] = useState(false);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [selectedCategoryForDetail, setSelectedCategoryForDetail] = useState("");
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
   const range = useMemo(() => rangeFor(filterKey, customRange), [filterKey, customRange]);
 
@@ -552,7 +555,11 @@ function HomePage() {
                 {data.recent.map((t) => {
                   const creator = getProfileById(t.createdBy);
                   return (
-                    <li key={t.id} className="flex items-center gap-3 py-2.5">
+                    <li
+                      key={t.id}
+                      className="flex cursor-pointer items-center gap-3 py-2.5 transition-colors hover:bg-muted/40"
+                      onClick={() => setSelectedTransaction(t)}
+                    >
                       <div className={cn(
                         "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
                         t.type === "income" ? "bg-income-soft text-income" : "bg-expense-soft text-expense",
@@ -593,6 +600,13 @@ function HomePage() {
       )}
 
       <TransactionFormDialog open={openForm} onOpenChange={setOpenForm} />
+      <TransactionDetailDialog
+        transaction={selectedTransaction}
+        open={!!selectedTransaction}
+        onOpenChange={(open) => {
+          if (!open) setSelectedTransaction(null);
+        }}
+      />
       <CategoryTransactionsDialog
         isOpen={isDetailDialogOpen}
         onOpenChange={setIsDetailDialogOpen}

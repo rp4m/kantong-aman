@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { TransactionFormDialog } from "@/components/TransactionFormDialog";
+import { TransactionDetailDialog } from "@/components/TransactionDetailDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -67,6 +68,7 @@ function TransaksiPage() {
   const [openForm, setOpenForm] = useState(false);
   const [editing, setEditing] = useState<Transaction | undefined>();
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
@@ -291,7 +293,11 @@ function TransaksiPage() {
                   {items.map((t) => {
                     const creator = getProfileById(t.createdBy);
                     return (
-                      <li key={t.id} className="flex items-center gap-3 px-4 py-3">
+                      <li
+                        key={t.id}
+                        className="flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/40"
+                        onClick={() => setSelectedTransaction(t)}
+                      >
                         <div className={cn(
                           "flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
                           t.type === "income" ? "bg-income-soft text-income" : "bg-expense-soft text-expense",
@@ -326,11 +332,11 @@ function TransaksiPage() {
                           </p>
                           <div className="flex">
                             <Button variant="ghost" size="icon" className="h-7 w-7"
-                              onClick={() => { setEditing(t); setOpenForm(true); }}>
+                              onClick={(e) => { e.stopPropagation(); setEditing(t); setOpenForm(true); }}>
                               <Pencil className="h-3.5 w-3.5" />
                             </Button>
                             <Button variant="ghost" size="icon" className="h-7 w-7 text-expense"
-                              onClick={() => setDeleteId(t.id)}>
+                              onClick={(e) => { e.stopPropagation(); setDeleteId(t.id); }}>
                               <Trash2 className="h-3.5 w-3.5" />
                             </Button>
                           </div>
@@ -363,6 +369,13 @@ function TransaksiPage() {
       </button>
 
       <TransactionFormDialog open={openForm} onOpenChange={setOpenForm} initial={editing} />
+      <TransactionDetailDialog
+        transaction={selectedTransaction}
+        open={!!selectedTransaction}
+        onOpenChange={(open) => {
+          if (!open) setSelectedTransaction(null);
+        }}
+      />
 
       <AlertDialog open={!!deleteId} onOpenChange={(v) => !v && setDeleteId(null)}>
         <AlertDialogContent>
