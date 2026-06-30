@@ -10,6 +10,7 @@ import { useBudgetItems, useBudgetPeriods, useCategories, usePICs, useProfiles, 
 import { formatDate, formatRupiah } from "@/lib/budget-format";
 import type { Transaction } from "@/lib/budget-types";
 import { cn } from "@/lib/utils";
+import { formatDistanceToNow, differenceInDays, format as formatDate2 } from "date-fns";
 
 interface Props {
   transaction: Transaction | null;
