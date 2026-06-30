@@ -11,6 +11,7 @@ import { formatDate, formatRupiah } from "@/lib/budget-format";
 import type { Transaction } from "@/lib/budget-types";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow, differenceInDays, format as formatDate2 } from "date-fns";
+import { id as idLocale } from "date-fns/locale";
 
 interface Props {
   transaction: Transaction | null;
