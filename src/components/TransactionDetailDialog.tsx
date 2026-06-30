@@ -98,7 +98,6 @@ export function TransactionDetailDialog({ transaction, open, onOpenChange }: Pro
               isIncome ? "text-income" : "text-expense",
             )}
           >
-            {isIncome ? "+" : "-"}
             {formatRupiah(transaction.amount)}
           </p>
         </div>
@@ -127,9 +126,23 @@ export function TransactionDetailDialog({ transaction, open, onOpenChange }: Pro
           </div>
 
           {detail?.creator?.fullName ? (
-            <p className="pt-2 text-center text-xs text-muted-foreground">
-              Dicatat oleh <span className="font-medium text-foreground/70">{detail.creator.fullName}</span>
-            </p>
+            // <p className="pt-2 text-center text-xs text-muted-foreground">
+            //   Dicatat oleh <span className="font-medium text-foreground/70">{detail.creator.fullName}</span>
+            //   <span className="mx-1">•</span>
+            //     {differenceInDays(new Date(), new Date(t.createdAt)) > 0
+            //         ? formatDate2(new Date(t.createdAt), "dd MMM yyyy", { locale: idLocale })
+            //         : formatDistanceToNow(new Date(t.createdAt), { addSuffix: true, locale: idLocale })}
+            // </p>
+            <div className="mt-2 flex items-baseline justify-center gap-1">
+                <span className="shrink-0 text-[10px] text-emerald-600">👤</span>
+                <p className="max-w-[85%] truncate text-center text-[10px] font-light text-emerald-600">
+                    {detail.creator.fullName}
+                    <span className="mx-1">•</span>
+                    {differenceInDays(new Date(), new Date(transaction.createdAt)) > 0
+                    ? formatDate2(new Date(transaction.createdAt), "dd MMM yyyy", { locale: idLocale })
+                    : formatDistanceToNow(new Date(transaction.createdAt), { addSuffix: true, locale: idLocale })}
+                </p>
+            </div>
           ) : null}
         </div>
       </DialogContent>
