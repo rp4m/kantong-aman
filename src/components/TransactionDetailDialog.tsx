@@ -1,9 +1,8 @@
 import { useMemo } from "react";
-import { CalendarDays, CircleDollarSign, StickyNote, User, ArrowDownLeft, ArrowUpRight } from "lucide-react";
+import { CalendarDays, Wallet, StickyNote, User, ArrowDownLeft, ArrowUpRight, Tag } from "lucide-react";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -53,79 +52,99 @@ export function TransactionDetailDialog({ transaction, open, onOpenChange }: Pro
 
   if (!transaction) return null;
 
+  const isIncome = transaction.type === "income";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <div className="flex items-center justify-between gap-2">
+      <DialogContent className="max-w-md overflow-hidden p-0">
+        {/* Header band */}
+        <div
+          className={cn(
+            "relative px-6 pb-6 pt-5",
+            isIncome
+              ? "bg-gradient-to-br from-income/10 via-income/5 to-transparent"
+              : "bg-gradient-to-br from-expense/10 via-expense/5 to-transparent",
+          )}
+        >
+          <DialogHeader className="space-y-0">
+            <div className="flex items-start justify-between gap-3 pr-8">
+              <div
+                className={cn(
+                  "flex h-11 w-11 shrink-0 items-center justify-center rounded-full",
+                  isIncome ? "bg-income text-white" : "bg-expense text-white",
+                )}
+              >
+                {isIncome ? <ArrowDownLeft className="h-5 w-5" /> : <ArrowUpRight className="h-5 w-5" />}
+              </div>
+              <div className="flex-1 text-left">
+                <DialogTitle className="text-base font-semibold leading-tight">
+                  {transaction.category}
+                </DialogTitle>
+                <p
+                  className={cn(
+                    "mt-0.5 text-xs font-medium",
+                    isIncome ? "text-income" : "text-expense",
+                  )}
+                >
+                  {isIncome ? "Pemasukan" : "Pengeluaran"} &middot; {formatDate(transaction.date)}
+                </p>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <p
+            className={cn(
+              "mt-5 text-3xl font-bold tracking-tight",
+              isIncome ? "text-income" : "text-expense",
+            )}
+          >
+            {isIncome ? "+" : "-"}
+            {formatRupiah(transaction.amount)}
+          </p>
+        </div>
+
+        {/* Body */}
+        <div className="space-y-1 px-6 pb-6 pt-1">
+          <InfoRow icon={Tag} label="Kategori" value={transaction.category} />
+          {detail?.budgetPeriod ? (
+            <InfoRow icon={Wallet} label="Budget Periode" value={detail.budgetPeriod.name} />
+          ) : null}
+          {detail?.pic ? <InfoRow icon={User} label="PIC" value={detail.pic.name} /> : null}
+          <InfoRow icon={CalendarDays} label="Tanggal" value={formatDate(transaction.date)} />
+
+          <div className="my-3 h-px bg-border" />
+
+          <div className="flex items-start gap-3 py-2">
+            <StickyNote className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
             <div>
-              <DialogTitle className="text-left">Detail Transaksi</DialogTitle>
-              <DialogDescription className="mt-1 text-left">
-                Informasi lengkap transaksi yang dipilih.
-              </DialogDescription>
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Catatan
+              </p>
+              <p className="mt-0.5 text-sm text-foreground/80">
+                {transaction.notes?.trim() ? transaction.notes : "Tidak ada catatan."}
+              </p>
             </div>
-            <span
-              className={cn(
-                "rounded-full px-2.5 py-1 text-xs font-semibold",
-                transaction.type === "income"
-                  ? "bg-income-soft text-income"
-                  : "bg-expense-soft text-expense",
-              )}
-            >
-              {transaction.type === "income" ? "Pemasukan" : "Pengeluaran"}
-            </span>
           </div>
-        </DialogHeader>
 
-        <div className="space-y-4 py-2">
-          <div className="rounded-2xl bg-muted/40 p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Nominal</p>
-            <p className={cn("mt-1 text-2xl font-semibold", transaction.type === "income" ? "text-income" : "text-expense")}>
-              {formatRupiah(transaction.amount)}
+          {detail?.creator?.fullName ? (
+            <p className="pt-2 text-center text-xs text-muted-foreground">
+              Dicatat oleh <span className="font-medium text-foreground/70">{detail.creator.fullName}</span>
             </p>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            <DetailItem icon={CalendarDays} label="Tanggal" value={formatDate(transaction.date)} />
-            <DetailItem icon={CircleDollarSign} label="Kategori" value={transaction.category} />
-            {detail?.budgetPeriod ? (
-              <DetailItem icon={CircleDollarSign} label="Budget Periode" value={detail.budgetPeriod.name} />
-            ) : null}
-            {detail?.pic ? (
-              <DetailItem icon={User} label="PIC" value={detail.pic.name} />
-            ) : null}
-          </div>
-
-          <div className="rounded-2xl border border-border bg-card p-4">
-            <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
-              <StickyNote className="h-4 w-4" />
-              Catatan
-            </div>
-            <p className="text-sm text-muted-foreground">
-              {transaction.notes?.trim() ? transaction.notes : "Tidak ada catatan."}
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2 rounded-2xl bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
-            {transaction.type === "income" ? <ArrowDownLeft className="h-4 w-4 text-income" /> : <ArrowUpRight className="h-4 w-4 text-expense" />}
-            <span>
-              {detail?.creator?.fullName ? `Dicatat oleh ${detail.creator.fullName}` : "Detail transaksi"}
-            </span>
-          </div>
+          ) : null}
         </div>
       </DialogContent>
     </Dialog>
   );
 }
 
-function DetailItem({ icon: Icon, label, value }: { icon: typeof CalendarDays; label: string; value: string }) {
+function InfoRow({ icon: Icon, label, value }: { icon: typeof CalendarDays; label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-3">
-      <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-        <Icon className="h-3.5 w-3.5" />
+    <div className="flex items-center justify-between gap-3 py-2">
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Icon className="h-4 w-4" />
         {label}
       </div>
-      <p className="mt-2 text-sm font-medium">{value}</p>
+      <span className="text-sm font-medium text-foreground">{value}</span>
     </div>
   );
 }
