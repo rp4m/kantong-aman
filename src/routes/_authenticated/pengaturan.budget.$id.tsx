@@ -221,7 +221,7 @@ function PICGroupTable({
               {/* Subtotal footer */}
               <tfoot>
                 <tr className="bg-primary/5 border-t-2 border-primary/20">
-                  <td className="py-3 px-3 font-bold text-primary text-xs" colSpan={isOwner ? 2 : 2}>
+                  <td className="py-3 px-3 font-bold text-primary text-xs">
                     <div className="flex items-center gap-1.5">
                       <CheckCircle2 className="h-3.5 w-3.5" />
                       Subtotal PIC
