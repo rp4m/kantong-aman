@@ -259,12 +259,10 @@ export function getActiveBudgetItems(dateISO: string, categoryId?: string): Budg
 }
 
 export function getRealizationForItem(item: BudgetItem): number {
-  const period = getBudgetPeriodById(item.budgetPeriodId);
-  if (!period) return 0;
   const cat = getCategoryById(item.categoryId);
   if (!cat) return 0;
   return txCache
-    .filter((t) => t.type === "expense" && t.category === cat.name && t.date >= period.startDate && t.date <= period.endDate)
+    .filter((t) => t.type === "expense" && t.category === cat.name && (t as any).budgetPeriodId === item.budgetPeriodId)
     .reduce((a, b) => a + b.amount, 0);
 }
 
