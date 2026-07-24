@@ -470,7 +470,7 @@ function BudgetDetailPage() {
       </section>
 
       {/* ── Stat Cards ── */}
-      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      {/* <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard
           label="Total Item"
           value={String(periodItems.length)}
@@ -499,7 +499,7 @@ function BudgetDetailPage() {
           icon={TrendingUp}
           color={grandTotalRemaining < 0 ? "bg-red-500" : "bg-cyan-600"}
         />
-      </div>
+      </div> */}
 
       {/* ── Per-PIC Tables ── */}
       <section className="mt-6">
@@ -537,7 +537,7 @@ function BudgetDetailPage() {
             ))}
 
             {/* Grand Total Footer Card */}
-            {picGroups.length > 1 && (
+            {/* {picGroups.length > 1 && (
               <div className="rounded-2xl border-2 border-primary/30 bg-gradient-to-r from-primary/5 to-violet-500/5 p-4 shadow-sm">
                 <div className="flex items-center gap-2 mb-3">
                   <div className="rounded-xl bg-primary p-1.5">
@@ -559,7 +559,7 @@ function BudgetDetailPage() {
                   ))}
                 </div>
               </div>
-            )}
+            )} */}
           </div>
         )}
       </section>
