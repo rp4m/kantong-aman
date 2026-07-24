@@ -227,7 +227,7 @@ function PICGroupTable({
                       Subtotal PIC
                     </div>
                   </td>
-                  <td className="hidden md:table-cell" />
+                  {/* <td className="hidden md:table-cell" /> */}
                   <td className="py-3 px-3 text-right font-bold text-primary">{formatRupiah(subtotalBudget)}</td>
                   <td className="py-3 px-3 text-right font-bold text-primary">{formatRupiah(subtotalRealized)}</td>
                   <td className="py-3 px-3 text-right font-bold text-muted-foreground hidden sm:table-cell">{formatRupiah(subtotalRemaining)}</td>
