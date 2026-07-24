@@ -412,7 +412,7 @@ function BudgetDetailPage() {
       <CollaboratorsSection budgetPeriodId={id} />
 
       {/* ── Hero Banner ── */}
-      <section className="mt-4 rounded-2xl bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-700 p-5 text-white shadow-lg relative overflow-hidden">
+      <section className="mt-4 rounded-2xl bg-gradient-to-br from-primary via-primary to-balance p-5 text-white shadow-lg relative overflow-hidden">
         {/* decorative blobs */}
         <div className="pointer-events-none absolute -top-8 -right-8 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
         <div className="pointer-events-none absolute bottom-0 left-1/3 h-24 w-24 rounded-full bg-white/8 blur-xl" />
