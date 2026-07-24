@@ -149,7 +149,7 @@ function PICGroupTable({
               <thead>
                 <tr className="bg-muted/40 border-b border-border/60">
                   <th className="text-left py-2.5 px-3 font-semibold text-muted-foreground">Kategori</th>
-                  <th className="text-left py-2.5 px-3 font-semibold text-muted-foreground hidden md:table-cell">Catatan</th>
+                  {/* <th className="text-left py-2.5 px-3 font-semibold text-muted-foreground hidden md:table-cell">Catatan</th> */}
                   <th className="text-right py-2.5 px-3 font-semibold text-muted-foreground">Budget</th>
                   <th className="text-right py-2.5 px-3 font-semibold text-muted-foreground">Realisasi</th>
                   <th className="text-right py-2.5 px-3 font-semibold text-muted-foreground hidden sm:table-cell">Sisa</th>
@@ -178,9 +178,9 @@ function PICGroupTable({
                           <span className="font-medium text-foreground">{cat}</span>
                         </div>
                       </td>
-                      <td className="py-3 px-3 text-muted-foreground hidden md:table-cell max-w-[180px]">
+                      {/* <td className="py-3 px-3 text-muted-foreground hidden md:table-cell max-w-[180px]">
                         <span className="line-clamp-2">{item.notes || <span className="italic opacity-50">—</span>}</span>
-                      </td>
+                      </td> */}
                       <td className="py-3 px-3 text-right font-semibold">{formatRupiah(item.amount)}</td>
                       <td className="py-3 px-3 text-right">
                         <span className={cn(
@@ -353,14 +353,14 @@ function BudgetDetailPage() {
   const statusColor = period.status === "active"
     ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400"
     : period.status === "draft"
-    ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400"
-    : "bg-muted text-muted-foreground";
+      ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400"
+      : "bg-muted text-muted-foreground";
 
   const statusIcon = period.status === "active"
     ? <CheckCircle2 className="h-3 w-3" />
     : period.status === "draft"
-    ? <Clock className="h-3 w-3" />
-    : null;
+      ? <Clock className="h-3 w-3" />
+      : null;
 
   const utilizationTone = grandTotalUtil >= 100 ? "expense" : grandTotalUtil >= 80 ? "warning" : "ok";
 
