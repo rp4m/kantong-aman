@@ -1,11 +1,11 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, ListOrdered, FileBarChart, Settings } from "lucide-react";
+import { LayoutDashboard, ListOrdered, BarChart3, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const items = [
   { to: "/", label: "Beranda", icon: LayoutDashboard },
   { to: "/transaksi", label: "Transaksi", icon: ListOrdered },
-  { to: "/laporan", label: "Laporan", icon: FileBarChart },
+  { to: "/laporan", label: "Analitik", icon: BarChart3 },
   { to: "/pengaturan", label: "Pengaturan", icon: Settings },
 ] as const;
 

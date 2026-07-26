@@ -262,7 +262,7 @@ export function getRealizationForItem(item: BudgetItem): number {
   const cat = getCategoryById(item.categoryId);
   if (!cat) return 0;
   return txCache
-    .filter((t) => t.type === "expense" && t.category === cat.name && (t as any).budgetPeriodId === item.budgetPeriodId)
+    .filter((t) => t.type === "expense" && t.category === cat.name && (t as any).budgetPeriodId === item.budgetPeriodId && t.budgetItemId === item.id)
     .reduce((a, b) => a + b.amount, 0);
 }
 

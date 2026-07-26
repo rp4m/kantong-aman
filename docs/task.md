@@ -1,0 +1,19 @@
+- `[x]` Update `BottomNav.tsx` to change label to "Analitik" and icon to `BarChart3`
+- `[x]` Revamp `laporan.tsx`:
+  - `[x]` Update imports (add necessary Lucide icons, components, etc.)
+  - `[x]` Add state for main tabs ("dashboard" vs "laporan")
+  - `[x]` Implement "Dashboard" view:
+    - `[x]` KPI Cards (Income, Expense, Balance, Savings Rate)
+    - `[x]` Cash Flow Bar (Visual representation of income vs expense)
+    - `[x]` Expense by Category (Donut/Progress UI)
+    - `[x]` PIC Realization (Budget vs Actual per PIC)
+    - `[x]` 6-Month Trend (Sparklines)
+    - `[x]` Recent Transactions (List of top 5)
+  - `[x]` Implement "Laporan" view (migrating existing functionality):
+    - `[x]` Filters (Mode: Monthly, Range, Period; Filter by PIC, Category)
+    - `[x]` Summary KPIs
+    - `[x]` Category Breakdown
+    - `[x]` Transaction Table
+    - `[x]` PDF/Excel Export
+- `[x]` Verify application runs correctly and UI looks modern and polished
+- `[x]` Create walkthrough artifact
