@@ -12,8 +12,32 @@ import {
   usePICs,
 } from "@/lib/cloud-store";
 
+let globalIsOpen = false;
+let globalMessages: { role: "user" | "model", text: string }[] = [];
+let globalIsLoading = false;
+
 export function ChatbotPopup() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpenState] = useState(globalIsOpen);
+  const [messages, setMessagesState] = useState(globalMessages);
+  const [isLoading, setIsLoadingState] = useState(globalIsLoading);
+  const [input, setInput] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const setIsOpen = (val: boolean) => {
+    globalIsOpen = val;
+    setIsOpenState(val);
+  };
+
+  const setMessages = (val: typeof globalMessages | ((prev: typeof globalMessages) => typeof globalMessages)) => {
+    const next = typeof val === "function" ? val(globalMessages) : val;
+    globalMessages = next;
+    setMessagesState(next);
+  };
+
+  const setIsLoading = (val: boolean) => {
+    globalIsLoading = val;
+    setIsLoadingState(val);
+  };
 
   // Data for context
   const transactions = useTransactions();
@@ -21,11 +45,6 @@ export function ChatbotPopup() {
   const budgetPeriods = useBudgetPeriods();
   const budgetItems = useBudgetItems();
   const pics = usePICs();
-
-  const [messages, setMessages] = useState<{ role: "user" | "model", text: string }[]>([]);
-  const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (messagesEndRef.current) {
