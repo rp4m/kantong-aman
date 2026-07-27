@@ -63,6 +63,7 @@ function BudgetDetailPage() {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [selectedCategoryForDetail, setSelectedCategoryForDetail] = useState("");
+  const [selectedCategoryItemIds, setSelectedCategoryItemIds] = useState<string[]>([]);
 
   const filteredRows = useMemo(() => {
     let filtered = filterPic === "all" ? rows : rows.filter((r) => r.item.picId === filterPic);
@@ -293,6 +294,7 @@ function BudgetDetailPage() {
                   className="rounded-xl bg-muted/40 p-3 hover:bg-muted/70 cursor-pointer transition-colors active:scale-[0.99]"
                   onClick={() => {
                     setSelectedCategoryForDetail(cat?.name ?? "");
+                    setSelectedCategoryItemIds([item.id]);
                     setIsDetailDialogOpen(true);
                   }}
                 >
@@ -373,6 +375,7 @@ function BudgetDetailPage() {
         isOpen={isDetailDialogOpen}
         onOpenChange={setIsDetailDialogOpen}
         categoryName={selectedCategoryForDetail}
+        itemIds={selectedCategoryItemIds}
       />
     </AppShell>
   );

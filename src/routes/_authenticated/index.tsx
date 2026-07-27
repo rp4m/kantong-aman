@@ -102,6 +102,7 @@ function HomePage() {
   const [isExpandedCategories, setIsExpandedCategories] = useState(false);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [selectedCategoryForDetail, setSelectedCategoryForDetail] = useState("");
+  const [selectedCategoryItemIds, setSelectedCategoryItemIds] = useState<string[]>([]);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
   const range = useMemo(() => rangeFor(filterKey, customRange), [filterKey, customRange]);
@@ -125,34 +126,18 @@ function HomePage() {
 
   // All transactions belonging to filtered budgets (via budgetPeriodId or via item matching)
   const filteredTransactions = useMemo(() => {
-    const { start, end } = range;
     const filteredItemIds = new Set(filteredItems.map((it) => it.id));
 
     return transactions.filter((t) => {
-      // Must be within the date range
-      // if (t.date < start || t.date > end) return false;
-      // Must belong to one of the filtered budgets
-      // Check via budgetItemId
-      const matchItem = (t.budgetItemId && filteredItemIds.has(t.budgetItemId));
-      // Check via budgetPeriodId
-      const matchPeriod = ((t as any).budgetPeriodId && filteredPeriodIds.has((t as any).budgetPeriodId));
-      // For expense: match by category to a filtered item
-      let matchExpense = true;
-      if (t.type === "expense") {
-        const cat = categories.find((c) => c.name === t.category);
-        matchExpense = (cat && filteredItems.some((it) => it.categoryId === cat.id));
-      }
-      // For income transactions linked to a filtered period
-      let matchIncome = true;
       if (t.type === "income") {
-        matchIncome = ((t as any).budgetPeriodId && filteredPeriodIds.has((t as any).budgetPeriodId));
+        return !!((t as any).budgetPeriodId && filteredPeriodIds.has((t as any).budgetPeriodId));
       }
-
-      if(matchItem && matchPeriod && matchExpense && matchIncome) return true;
-
+      if (t.type === "expense") {
+        return !!(t.budgetItemId && filteredItemIds.has(t.budgetItemId));
+      }
       return false;
     });
-  }, [transactions, categories, filteredItems, filteredPeriodIds, range]);
+  }, [transactions, filteredItems, filteredPeriodIds]);
 
   const data = useMemo(() => {
     if (filteredPeriods.length === 0) {
@@ -170,13 +155,8 @@ function HomePage() {
     const expByItem = new Map<string, number>();
     filteredTransactions.forEach((t) => {
       if (t.type !== "expense") return;
-      if (t.budgetItemId && filteredItems.some((it) => it.id === t.budgetItemId)) {
+      if (t.budgetItemId) {
         expByItem.set(t.budgetItemId, (expByItem.get(t.budgetItemId) ?? 0) + t.amount);
-      } else {
-        const cat = categories.find((c) => c.name === t.category);
-        if (!cat) return;
-        const match = filteredItems.find((it) => it.categoryId === cat.id);
-        if (match) expByItem.set(match.id, (expByItem.get(match.id) ?? 0) + t.amount);
       }
     });
 
@@ -189,15 +169,16 @@ function HomePage() {
     const totalExpense = filteredTransactions.filter((t) => t.type === "expense").reduce((a, t) => a + t.amount, 0);
 
     // Category aggregation (deduplicate across periods by category+pic combo)
-    const catMap = new Map<string, { id: string; categoryName: string; picName: string; budget: number; actual: number }>();
+    const catMap = new Map<string, { id: string; itemIds: string[]; categoryName: string; picName: string; budget: number; actual: number }>();
     filteredItems.forEach((it) => {
       const cat = catById.get(it.categoryId);
       const pic = picById.get(it.picId);
       const key = `${it.categoryId}-${it.picId}`;
       const cur = catMap.get(key) ?? {
-        id: it.id, categoryName: cat?.name ?? "—", picName: pic?.name ?? "—",
+        id: it.id, itemIds: [], categoryName: cat?.name ?? "—", picName: pic?.name ?? "—",
         budget: 0, actual: 0,
       };
+      cur.itemIds.push(it.id);
       cur.budget += it.amount;
       cur.actual += expByItem.get(it.id) ?? 0;
       catMap.set(key, cur);
@@ -434,6 +415,7 @@ function HomePage() {
                         className="rounded-xl bg-muted/40 p-3 hover:bg-muted/70 cursor-pointer transition-colors active:scale-[0.99]"
                         onClick={() => {
                           setSelectedCategoryForDetail(r.categoryName);
+                          setSelectedCategoryItemIds(r.itemIds);
                           setIsDetailDialogOpen(true);
                         }}
                       >
@@ -611,6 +593,7 @@ function HomePage() {
         isOpen={isDetailDialogOpen}
         onOpenChange={setIsDetailDialogOpen}
         categoryName={selectedCategoryForDetail}
+        itemIds={selectedCategoryItemIds}
       />
     </AppShell>
   );

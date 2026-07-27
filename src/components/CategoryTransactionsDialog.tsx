@@ -12,12 +12,14 @@ interface CategoryTransactionsDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   categoryName: string;
+  itemIds?: string[];
 }
 
 export function CategoryTransactionsDialog({
   isOpen,
   onOpenChange,
   categoryName,
+  itemIds,
 }: CategoryTransactionsDialogProps) {
   const transactions = useTransactions();
   const periods = useBudgetPeriods();
@@ -25,8 +27,17 @@ export function CategoryTransactionsDialog({
 
   const { allFiltered, preview, hasMore } = useMemo(() => {
     if (!categoryName) return { allFiltered: [], preview: [], hasMore: false };
+    
+    const idSet = itemIds ? new Set(itemIds) : null;
+
     const allFiltered = transactions
-      .filter((t) => t.category.toLowerCase() === categoryName.toLowerCase())
+      .filter((t) => {
+        if (t.category.toLowerCase() !== categoryName.toLowerCase()) return false;
+        if (idSet && t.type === "expense") {
+          return !!(t.budgetItemId && idSet.has(t.budgetItemId));
+        }
+        return true;
+      })
       .sort((a, b) => {
         if (a.date !== b.date) return b.date.localeCompare(a.date);
         return b.createdAt.localeCompare(a.createdAt);
@@ -36,7 +47,7 @@ export function CategoryTransactionsDialog({
       preview: allFiltered.slice(0, PREVIEW_LIMIT),
       hasMore: allFiltered.length > PREVIEW_LIMIT,
     };
-  }, [transactions, categoryName]);
+  }, [transactions, categoryName, itemIds]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
