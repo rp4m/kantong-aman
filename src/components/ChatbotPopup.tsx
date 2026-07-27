@@ -47,9 +47,6 @@ export function ChatbotPopup() {
         throw new Error("API Key belum diset di VITE_GEMINI_API_KEY");
       }
 
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
       // Construct system context
       const contextData = {
         budgetPeriods: budgetPeriods.map(p => ({ id: p.id, name: p.name, start: p.startDate, end: p.endDate })),
@@ -66,13 +63,18 @@ ${JSON.stringify(contextData)}
 
 Berikan jawaban yang ringkas, ramah, berbahasa Indonesia, dan langsung pada intinya. Jika memungkinkan, sajikan poin-poin agar mudah dibaca. Hindari menjelaskan teknis ID internal, fokus pada insight data.`;
 
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({ 
+        model: "gemini-1.5-flash",
+        systemInstruction: systemPrompt 
+      });
+
       const history = messages.map(msg => ({
         role: msg.role === "user" ? "user" : "model",
         parts: [{ text: msg.text }]
       }));
 
       const chat = model.startChat({
-        systemInstruction: systemPrompt,
         history: history,
       });
 
