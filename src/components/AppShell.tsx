@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { BottomNav } from "./BottomNav";
 import { NotificationBell } from "./NotificationBell";
+import { ChatbotPopup } from "./ChatbotPopup";
 
 interface AppShellProps {
   title: string;
@@ -28,6 +29,7 @@ export function AppShell({ title, subtitle, action, children }: AppShellProps) {
       </header>
       <main className="mx-auto max-w-2xl px-4 py-4">{children}</main>
       <BottomNav />
+      <ChatbotPopup />
     </div>
   );
 }
