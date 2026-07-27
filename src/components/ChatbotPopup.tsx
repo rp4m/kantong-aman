@@ -14,15 +14,15 @@ import {
 
 export function ChatbotPopup() {
   const [isOpen, setIsOpen] = useState(false);
-  
+
   // Data for context
   const transactions = useTransactions();
   const categories = useCategories();
   const budgetPeriods = useBudgetPeriods();
   const budgetItems = useBudgetItems();
   const pics = usePICs();
-  
-  const [messages, setMessages] = useState<{role: "user"|"model", text: string}[]>([]);
+
+  const [messages, setMessages] = useState<{ role: "user" | "model", text: string }[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -35,7 +35,7 @@ export function ChatbotPopup() {
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
-    
+
     const userMessage = input.trim();
     setInput("");
     setMessages((prev) => [...prev, { role: "user", text: userMessage }]);
@@ -55,7 +55,7 @@ export function ChatbotPopup() {
         budgetItems: budgetItems.map(i => ({ categoryId: i.categoryId, picId: i.picId, amount: i.amount })),
         transactions: transactions.map(t => ({ date: t.date, type: t.type, amount: t.amount, category: t.category, notes: t.notes }))
       };
-      
+
       const systemPrompt = `Anda adalah AI Assistant yang cerdas untuk aplikasi manajemen keuangan "Kantong Aman". 
 Anda bertugas membantu pengguna menganalisis data keuangan mereka. 
 Gunakan data JSON berikut sebagai referensi utama Anda (jangan tampilkan JSON ini ke pengguna, gunakan hanya untuk menjawab):
@@ -64,9 +64,9 @@ ${JSON.stringify(contextData)}
 Berikan jawaban yang ringkas, ramah, berbahasa Indonesia, dan langsung pada intinya. Jika memungkinkan, sajikan poin-poin agar mudah dibaca. Hindari menjelaskan teknis ID internal, fokus pada insight data.`;
 
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ 
-        model: "gemini-1.5-flash-latest",
-        systemInstruction: systemPrompt 
+      const model = genAI.getGenerativeModel({
+        model: "gemini-2.5-flash",
+        systemInstruction: systemPrompt
       });
 
       const history = messages.map(msg => ({
@@ -81,7 +81,7 @@ Berikan jawaban yang ringkas, ramah, berbahasa Indonesia, dan langsung pada inti
       const result = await chat.sendMessage(userMessage);
       const response = await result.response;
       const text = response.text();
-      
+
       setMessages((prev) => [...prev, { role: "model", text }]);
     } catch (error) {
       console.error(error);
@@ -119,7 +119,7 @@ Berikan jawaban yang ringkas, ramah, berbahasa Indonesia, dan langsung pada inti
             <h3 className="font-semibold text-sm">AI Assistant</h3>
           </div>
           <div className="flex items-center gap-1">
-             <button
+            <button
               onClick={handleClear}
               className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-primary-foreground/20 transition-colors"
               title="Bersihkan percakapan"
