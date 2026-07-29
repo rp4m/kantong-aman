@@ -159,7 +159,13 @@ function TransaksiPage() {
   }, [filterType, filterCategory, filterPic, filterFrom, filterTo, filterOnlyMe, pics]);
 
   return (
-    <AppShell title="Transaksi" subtitle={`${Math.min(visibleCount, filtered.length)} dari ${filtered.length} transaksi`}>
+    <AppShell title="Transaksi" subtitle={`${Math.min(visibleCount, filtered.length)} dari ${filtered.length} transaksi`}
+      action={
+        <Button size="sm" onClick={() => { setEditing(undefined); setOpenForm(true); }} className="rounded-full">
+          <Plus className="mr-1 h-4 w-4" /> Tambah
+        </Button>
+      }
+    >
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -360,13 +366,13 @@ function TransaksiPage() {
       </div>
 
       {/* Floating Action Button */}
-      <button
+      {/* <button
         onClick={() => { setEditing(undefined); setOpenForm(true); }}
         className="fixed bottom-24 right-4 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl shadow-primary/30 transition-transform active:scale-95"
         aria-label="Tambah transaksi"
       >
         <Plus className="h-6 w-6" />
-      </button>
+      </button> */}
 
       <TransactionFormDialog open={openForm} onOpenChange={setOpenForm} initial={editing} />
       <TransactionDetailDialog
